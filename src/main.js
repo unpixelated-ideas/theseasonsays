@@ -1,0 +1,49 @@
+import {updateLog,bindUpdateLog} from './components/update-log.js';
+import {legalContent} from './components/legal.js';
+import {bindAllowedOverlaps} from './components/allowed-overlaps.js';
+import {formatTimeZone} from './lib/formatting.js';
+import {site} from './config/site.js';
+import {messages} from './i18n/messages.js';
+import {localDate,key,fromKey,addDays,difference,daysInYear} from './lib/dates.js';
+import {parseColors,paletteFor} from './lib/csv.js';
+import {parseCalendar,parseAnnual,activeOn,nextChange,periodsForYear} from './lib/calendar.js';
+import {escapeHTML as e,formatDate,currentCard,upcomingCard,annualView} from './components/views.js';
+const app=document.querySelector('#app');
+const closeAllowedOverlaps=bindAllowedOverlaps(app);
+function stored(k,fallback){try{return localStorage.getItem(k)||fallback;}catch{return fallback;}}
+function persist(k,v){try{localStorage.setItem(k,v);}catch{/* Preferences still work in memory. */}}
+let language=stored('guide-language','en');if(!messages[language])language='en';
+let appearance=stored('guide-appearance','system');if(!['system','light','dark'].includes(appearance))appearance='system';
+let actualNow=new Date(),today=localDate(actualNow.getFullYear(),actualNow.getMonth()+1,actualNow.getDate()),selectedDate=today,followingToday=true;
+const system=matchMedia('(prefers-color-scheme: dark)');
+let rows=[],annual=new Map(),colors=new Map();
+const t=()=>messages[language];
+function theme(){const mode=appearance==='system'?(system.matches?'dark':'light'):appearance;document.documentElement.dataset.theme=mode;const palette=paletteFor(colors,selectedDate,mode,site.fallbackPalette);const style=document.documentElement.style;style.backgroundColor=palette.background;style.setProperty('--ink',palette.text);style.setProperty('--muted',palette.text);style.setProperty('--slider-accent',palette.slider);}
+function metadata(){document.documentElement.lang=language;document.title=site.productName[language];document.querySelector('meta[name="description"]').content=site.metadataDescription[language];}
+const dateIcon='<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 2v6m10-6v6M3 11h18"/></svg>';
+function route(){return location.hash.slice(1)||'home';}
+function choose(date){if(!date||date.getFullYear()<site.minYear||date.getFullYear()>site.maxYear)return;selectedDate=date;followingToday=key(date)===key(today);theme();updateDateContent();}
+function render(){closeAllowedOverlaps();metadata();theme();const m=t();app.innerHTML=`<header class="controls"><label><span>${m.language}</span><select id="language" aria-label="${m.language}"><option value="en" ${language==='en'?'selected':''}>English</option><option value="ko" ${language==='ko'?'selected':''}>한국어</option><option value="ga" ${language==='ga'?'selected':''}>Gaeilge</option></select></label><label><span>${m.appearance}</span><select id="appearance" aria-label="${m.appearance}">${['system','light','dark'].map(x=>`<option value="${x}" ${appearance===x?'selected':''}>${m[x]}</option>`).join('')}</select></label><div class="date-control"><button id="calendar-button" aria-label="${m.calendar}" aria-expanded="false">${dateIcon}</button><div class="date-popover" id="date-popover" hidden><label for="calendar-date">${m.calendar}</label><input id="calendar-date" type="date" min="${site.minYear}-01-01" max="${site.maxYear}-12-31" value="${key(selectedDate)}"></div></div></header><main tabindex="-1"><div class="masthead"><a href="#home" class="brand">${e(site.productName[language])}</a><p>${e(site.tagline[language])}</p></div><div id="page"></div></main><footer><div class="footer-links">${['about','privacy','terms','feedback','complete'].map(x=>['privacy','terms'].includes(x)?`<a href="#${x}">${m[x]}</a>`:`<span role="link" aria-disabled="true">${m[x]}</span>`).join('')}${updateLog(language,m)}</div></footer>`;
+ bindUpdateLog();
+ document.querySelector('#language').onchange=event=>{language=event.target.value;persist('guide-language',language);render();};
+ document.querySelector('#appearance').onchange=event=>{appearance=event.target.value;persist('guide-appearance',appearance);theme();};
+ const button=document.querySelector('#calendar-button'),popover=document.querySelector('#date-popover');button.onclick=()=>{popover.hidden=!popover.hidden;button.setAttribute('aria-expanded',String(!popover.hidden));if(!popover.hidden)document.querySelector('#calendar-date').focus();};
+ document.querySelector('#calendar-date').oninput=event=>{choose(fromKey(event.target.value));if(route()!=='home')location.hash='home';};
+ renderPage();}
+function renderPage(){closeAllowedOverlaps();const m=t(),page=document.querySelector('#page'),r=route();if(r==='home'){page.innerHTML=`<section class="date-section" aria-label="${m.currentDate}"><div class="date-state" id="date-state"></div><h1 id="full-date"></h1><p class="clock" id="clock"></p><p class="timezone" id="timezone"></p><div class="slider-wrap"><div class="slider-labels"><span id="year-start"></span><span id="slider-year"></span><span id="year-end"></span></div><div class="slider-control"><div class="slider-track" aria-hidden="true"><div class="slider-fill"></div></div><input id="date-slider" type="range" min="0" step="1" aria-label="${m.range}"></div></div></section><p class="intro">${m.intro}</p><div id="seasonal-content"></div>`;document.querySelector('#date-slider').oninput=event=>choose(addDays(localDate(selectedDate.getFullYear(),1,1),Number(event.target.value)));updateDateContent();}else if(r==='complete'){const y=selectedDate.getFullYear();page.innerHTML=`<a class="back" href="#home">← ${m.back}</a>`+annualView([y-1,y].flatMap(y=>periodsForYear(rows,annual,y)),y,language,m);document.querySelector('#year').onchange=event=>{selectedDate=localDate(Number(event.target.value),1,1);followingToday=key(selectedDate)===key(today);render();};}else{const valid=['about','privacy','terms','feedback'].includes(r);page.innerHTML=`<a class="back" href="#home">← ${m.back}</a><section class="card information"><p class="eyebrow">${e(site.productName[language])}</p><h1>${valid?m[r]:m.notFound}</h1>${['privacy','terms'].includes(r)?legalContent(r,language):valid?`<p>${m[r+'Text']}</p>`:''}</section>`;}}
+function updateDateContent(){closeAllowedOverlaps();const m=t(),d=selectedDate;if(!document.querySelector('#full-date'))return;document.querySelector('#full-date').textContent=formatDate(d,m,true);document.querySelector('#date-state').innerHTML=followingToday?`<span class="live-dot"></span>${m.today}`:`${m.exploring}<button id="return-today">${m.today} ↗</button>`;document.querySelector('#return-today')?.addEventListener('click',()=>{selectedDate=today;followingToday=true;theme();updateDateContent();});const slider=document.querySelector('#date-slider');slider.max=daysInYear(d.getFullYear())-1;slider.value=difference(d,localDate(d.getFullYear(),1,1));slider.parentElement.style.setProperty('--slider-progress',`${Number(slider.value)/Number(slider.max)*100}%`);slider.setAttribute('aria-valuetext',formatDate(d,m,true));document.querySelector('#year-start').textContent=formatDate(localDate(d.getFullYear(),1,1),m);document.querySelector('#year-end').textContent=formatDate(localDate(d.getFullYear(),12,31),m);document.querySelector('#slider-year').textContent=d.getFullYear();document.querySelector('#calendar-date').value=key(d);document.querySelector('#seasonal-content').innerHTML=(d.getFullYear()<site.minYear||d.getFullYear()>site.maxYear?`<p>${m.unavailable}</p>`:'')+currentCard(activeOn(rows,annual,d),language,m,difference(d,today))+upcomingCard(nextChange(rows,annual,d),language,m);updateClock();}
+function updateClock(){const clock=document.querySelector('#clock');if(!clock)return;const m=t();clock.textContent=new Intl.DateTimeFormat(m.locale,{hour:'numeric',minute:'2-digit',second:'2-digit'}).format(actualNow);const zone=document.querySelector('#timezone');zone.textContent=formatTimeZone(actualNow,m.locale);for(const element of [clock,zone]){element.style.visibility=key(selectedDate)===key(today)?'visible':'hidden';}}
+function tick(){actualNow=new Date();const newToday=localDate(actualNow.getFullYear(),actualNow.getMonth()+1,actualNow.getDate());if(key(newToday)!==key(today)){today=newToday;if(followingToday){selectedDate=today;theme();renderPage();}else{updateDateContent();}}updateClock();}
+// Pointer events cover both mouse clicks and taps outside the picker.
+document.addEventListener('pointerdown', event => {
+  const control = document.querySelector('.date-control');
+  const popover = document.querySelector('#date-popover');
+  if (!popover || popover.hidden || control.contains(event.target)) return;
+  if (popover.contains(document.activeElement)) document.activeElement.blur();
+  popover.hidden = true;
+  document.querySelector('#calendar-button').setAttribute('aria-expanded', 'false');
+});
+window.addEventListener('hashchange',()=>{render();document.querySelector('main').focus({preventScroll:true});});system.addEventListener('change',theme);document.addEventListener('visibilitychange',tick);document.addEventListener('keydown',event=>{if(event.key==='Escape'){const p=document.querySelector('#date-popover');if(p&&!p.hidden){p.hidden=true;document.querySelector('#calendar-button').setAttribute('aria-expanded','false');document.querySelector('#calendar-button').focus();}}});
+metadata();
+app.textContent=t().loading;
+try{const files=await Promise.all(['calendar.csv','annual-dates.csv','daily-colors.csv'].map(async file=>{const response=await fetch(new URL(`./data/${file}`,import.meta.url));if(!response.ok)throw Error(file);return response.text();}));rows=parseCalendar(files[0]);annual=parseAnnual(files[1]);colors=parseColors(files[2]);render();setInterval(tick,1000);}catch(error){console.error(error);app.textContent=t().error;}
