@@ -35,7 +35,16 @@ input[type=range]{accent-color:var(--slider-accent,var(--accent))}
 
 .suggestions{grid-template-columns:repeat(2,minmax(0,1fr))}
 .suggestions .unspecified{font-size:14px;color:var(--muted);line-height:1.7;margin:0}
-@media(max-width:650px){.suggestions{grid-template-columns:1fr}}
+@media(max-width:650px){
+  .suggestions{grid-template-columns:1fr}
+  .suggestions > div + div::before {
+    content:"";
+    display:block;
+    width:80%;
+    border-top:1px solid var(--line);
+    margin:4px auto 23px;
+  }
+}
 
 
 summary .overlap-emoji{display:inline;margin:0 8px 0 0;font-size:1em;color:inherit}

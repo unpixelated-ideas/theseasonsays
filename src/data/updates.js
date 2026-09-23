@@ -28,6 +28,13 @@ export const updates = [
     ko: ['iMessage, Discord 및 기타 지원 앱에서 더 깔끔하게 공유할 수 있도록 링크 미리보기를 개선했습니다.', '각 계절 행사에 대한 문구를 더 명확하게 다듬었습니다.'],
     ga: ['Feabhsaíodh réamhamhairc nasc chun comhroinnt níos slachtmhaire a dhéanamh in iMessage, Discord agus aipeanna eile a dtacaítear leo.', 'Athraíodh an fhoclaíocht do gach imeacht séasúrach chun í a dhéanamh níos soiléire.'],
   },
+  {
+    date: '2026-09-23',
+    version: 'v0.4.1',
+    en: ['Added a visual divider line between the Allowed and Not Allowed sections when viewing on a smartphone.'],
+    ko: ['스마트폰에서 볼 때 허용 및 금지 섹션 사이에 구분선을 추가했습니다.'],
+    ga: ['Cuireadh líne dheighilte idir na rannáin Ceadaithe agus Toirmiscthe agus an suíomh á fheiceáil ar fhón cliste.'],
+  },
 ];
 export const updateLabels = {
   en: { title: 'Update Log', close: 'Close' },
