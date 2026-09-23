@@ -35,7 +35,7 @@ The build copies the static application into `dist/` and inserts the configured 
 
 ## Working product name
 
-The localized **`productName` map in `src/config/site.js`** defines the product name for English, Korean, and Irish. The heading, document title, build-time HTML title, and relevant page references use that configuration and follow the selected language. The static HTML fallback uses English. Taglines and descriptions are independently localized in the same file. Rebuild after changing branding. No final domain, logo, favicon, repository identity, or social image is assumed. Add future canonical/social metadata here when those details are known. The generic package name is deliberately independent of the product name.
+The localized **`productName` map in `src/config/site.js`** defines the product name for English, Korean, and Irish. The heading, document title, build-time HTML title, and relevant page references use that configuration and follow the selected language. The build generates localized initial HTML for each language. Taglines and descriptions are independently localized in the same file. Rebuild after changing branding. Production URLs, language routes, and the shared social image are configured here too. The root asset `previewimage.png` is copied unchanged into `dist/previewimage.png`, and its absolute production URL is used for Open Graph and Twitter previews. The generic package name is deliberately independent of the product name.
 
 ## Editing `calendar.csv`
 
@@ -127,7 +127,7 @@ TZ=Asia/Seoul npm test
 TZ=Pacific/Honolulu npm test
 ```
 
-An optional `scripts/browser-check.mjs` integration script uses a separately installed Playwright package and Chromium. It is not a production dependency. Run it with the preview server running; set `PLAYWRIGHT_MODULE` to your Playwright module path if it is not locally resolvable, and optionally `BROWSER_CHANNEL=chrome` to use installed Chrome. It checks clock ticks, midnight/year rollover, pinned exploration, date controls, responsive widths, themes, all languages, footer routes, and a mocked branding rename. Screenshots are temporary files outside the repository.
+An optional `scripts/browser-check.mjs` integration script uses a separately installed Playwright package and Chromium. It is not a production dependency. Run it with the preview server running; set `PLAYWRIGHT_MODULE` to your Playwright module path if it is not locally resolvable, and optionally `BROWSER_CHANNEL=chrome` to use installed Chrome. It checks clock ticks, midnight/year rollover, pinned exploration, date controls, responsive widths, themes, all languages, footer routes, and a mocked branding rename. Screenshots are temporary files outside the repository. `scripts/localization-browser-check.mjs` checks the built and served initial HTML, preview image, direct localized routes, preference precedence, selector history, and live metadata; run it against `node scripts/dev.mjs --dist` with the same Playwright settings.
 
 ## GitHub and static hosting
 
@@ -137,9 +137,13 @@ The website's public URL after deployment is [The Season Says](https://unpixelat
 
 One-time setup on GitHub: open **Settings → Pages → Build and deployment → Source** and select **GitHub Actions**. Commit and push the changes to `main` using GitHub Desktop, then wait for the deployment workflow to succeed. If the initial run happened before enabling Pages, rerun it from Actions. Leave the custom-domain field empty.
 
-The existing build already supports `/theseasonsays/`: HTML uses relative stylesheet/module URLs, JavaScript imports are relative, and CSV URLs resolve relative to their module using `import.meta.url`. Hash routes such as `/theseasonsays/#complete`, `#privacy`, and `#terms` keep direct links and refreshes on the same static entry page without server rewrites or a 404 workaround. English, Korean, and Irish use the existing language selector and saved preference, with bundled translations; there are no separate `/ko/` or `/ga/` routes. Branding and localized metadata remain unchanged.
+The build generates `dist/index.html` (English), `dist/ko/index.html` (Korean), and `dist/ga/index.html` (Irish) from the single `index.html` template. All load the same application and styles in `dist/src/`. Each entry contains localized titles, descriptions, Open Graph and Twitter metadata, a self-referencing canonical, and English/Korean/Irish plus x-default alternates before JavaScript runs.
 
-For another static host, run `npm run build` and publish the contents of `dist/`. No repository path or domain is hardcoded into the application, so the same output also supports a future custom domain.
+Production canonical URLs are `https://unpixelated-ideas.github.io/theseasonsays/`, `https://unpixelated-ideas.github.io/theseasonsays/ko/`, and `https://unpixelated-ideas.github.io/theseasonsays/ga/`. The shared preview image is `https://unpixelated-ideas.github.io/theseasonsays/previewimage.png`.
+
+The pathname controls language and overrides `guide-language` in localStorage, including English at the root. The selector updates history without reloading, preserves hash routes such as `#privacy` and `#complete`, and supports Back/Forward. No `/en/` route is generated.
+
+For another static host, run `npm run build` and publish only `dist/`; generated output should not be committed. Navigation discovers the host's mount point from the shared module URL. Canonical/social URLs intentionally continue to identify the official production site; update site configuration if moving it. Both `npm run dev` and `node scripts/dev.mjs --dist` serve localized entries, shared assets, and the PNG image.
 
 Before public release, review Korean and Irish editorial copy with fluent speakers and replace the placeholder legal/feedback pages as appropriate.
 

@@ -2,7 +2,7 @@ import {updateLog,bindUpdateLog} from './components/update-log.js';
 import {legalContent} from './components/legal.js';
 import {bindAllowedOverlaps} from './components/allowed-overlaps.js';
 import {formatTimeZone} from './lib/formatting.js';
-import {site} from './config/site.js';
+import {site,languageFromPath,languagePath,applicationBaseURL,canonicalURL} from './config/site.js';
 import {messages} from './i18n/messages.js';
 import {localDate,key,fromKey,addDays,difference,daysInYear} from './lib/dates.js';
 import {parseColors,paletteFor} from './lib/csv.js';
@@ -12,20 +12,32 @@ const app=document.querySelector('#app');
 const closeAllowedOverlaps=bindAllowedOverlaps(app);
 function stored(k,fallback){try{return localStorage.getItem(k)||fallback;}catch{return fallback;}}
 function persist(k,v){try{localStorage.setItem(k,v);}catch{/* Preferences still work in memory. */}}
-let language=stored('guide-language','en');if(!messages[language])language='en';
+let language=languageFromPath(location.pathname);
 let appearance=stored('guide-appearance','system');if(!['system','light','dark'].includes(appearance))appearance='system';
 let actualNow=new Date(),today=localDate(actualNow.getFullYear(),actualNow.getMonth()+1,actualNow.getDate()),selectedDate=today,followingToday=true;
 const system=matchMedia('(prefers-color-scheme: dark)');
 let rows=[],annual=new Map(),colors=new Map();
 const t=()=>messages[language];
 function theme(){const mode=appearance==='system'?(system.matches?'dark':'light'):appearance;document.documentElement.dataset.theme=mode;const palette=paletteFor(colors,selectedDate,mode,site.fallbackPalette);const style=document.documentElement.style;style.backgroundColor=palette.background;style.setProperty('--ink',palette.text);style.setProperty('--muted',palette.text);style.setProperty('--slider-accent',palette.slider);}
-function metadata(){document.documentElement.lang=language;document.title=site.productName[language];document.querySelector('meta[name="description"]').content=site.metadataDescription[language];}
+function metadata(){
+ document.documentElement.lang=language;document.title=site.productName[language];
+ for(const [selector,value] of [
+  ['meta[name="description"]',site.metadataDescription[language]],
+  ['meta[property="og:title"]',site.productName[language]],
+  ['meta[property="og:site_name"]',site.productName[language]],
+  ['meta[property="og:description"]',site.metadataDescription[language]],
+  ['meta[property="og:url"]',canonicalURL(language)],
+  ['meta[name="twitter:title"]',site.productName[language]],
+  ['meta[name="twitter:description"]',site.metadataDescription[language]],
+ ])document.querySelector(selector).content=value;
+ document.querySelector('link[rel="canonical"]').href=canonicalURL(language);
+}
 const dateIcon='<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 2v6m10-6v6M3 11h18"/></svg>';
 function route(){return location.hash.slice(1)||'home';}
 function choose(date){if(!date||date.getFullYear()<site.minYear||date.getFullYear()>site.maxYear)return;selectedDate=date;followingToday=key(date)===key(today);theme();updateDateContent();}
 function render(){closeAllowedOverlaps();metadata();theme();const m=t();app.innerHTML=`<header class="controls"><label><span>${m.language}</span><select id="language" aria-label="${m.language}"><option value="en" ${language==='en'?'selected':''}>English</option><option value="ko" ${language==='ko'?'selected':''}>한국어</option><option value="ga" ${language==='ga'?'selected':''}>Gaeilge</option></select></label><label><span>${m.appearance}</span><select id="appearance" aria-label="${m.appearance}">${['system','light','dark'].map(x=>`<option value="${x}" ${appearance===x?'selected':''}>${m[x]}</option>`).join('')}</select></label><div class="date-control"><button id="calendar-button" aria-label="${m.calendar}" aria-expanded="false">${dateIcon}</button><div class="date-popover" id="date-popover" hidden><label for="calendar-date">${m.calendar}</label><input id="calendar-date" type="date" min="${site.minYear}-01-01" max="${site.maxYear}-12-31" value="${key(selectedDate)}"></div></div></header><main tabindex="-1"><div class="masthead"><a href="#home" class="brand">${e(site.productName[language])}</a><p>${e(site.tagline[language])}</p></div><div id="page"></div></main><footer><div class="footer-links">${['about','privacy','terms','feedback','complete'].map(x=>['privacy','terms'].includes(x)?`<a href="#${x}">${m[x]}</a>`:`<span role="link" aria-disabled="true">${m[x]}</span>`).join('')}${updateLog(language,m)}</div></footer>`;
  bindUpdateLog();
- document.querySelector('#language').onchange=event=>{language=event.target.value;persist('guide-language',language);render();};
+ document.querySelector('#language').onchange=event=>{language=event.target.value;const url=new URL(languagePath(language),applicationBaseURL);url.search=location.search;url.hash=location.hash;if(url.href!==location.href)history.pushState(null,'',url);persist('guide-language',language);render();};
  document.querySelector('#appearance').onchange=event=>{appearance=event.target.value;persist('guide-appearance',appearance);theme();};
  const button=document.querySelector('#calendar-button'),popover=document.querySelector('#date-popover');button.onclick=()=>{popover.hidden=!popover.hidden;button.setAttribute('aria-expanded',String(!popover.hidden));if(!popover.hidden)document.querySelector('#calendar-date').focus();};
  document.querySelector('#calendar-date').oninput=event=>{choose(fromKey(event.target.value));if(route()!=='home')location.hash='home';};
@@ -43,6 +55,7 @@ document.addEventListener('pointerdown', event => {
   popover.hidden = true;
   document.querySelector('#calendar-button').setAttribute('aria-expanded', 'false');
 });
+window.addEventListener('popstate',()=>{language=languageFromPath(location.pathname);persist('guide-language',language);render();});
 window.addEventListener('hashchange',()=>{render();document.querySelector('main').focus({preventScroll:true});});system.addEventListener('change',theme);document.addEventListener('visibilitychange',tick);document.addEventListener('keydown',event=>{if(event.key==='Escape'){const p=document.querySelector('#date-popover');if(p&&!p.hidden){p.hidden=true;document.querySelector('#calendar-button').setAttribute('aria-expanded','false');document.querySelector('#calendar-button').focus();}}});
 metadata();
 app.textContent=t().loading;
