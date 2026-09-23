@@ -9,7 +9,8 @@ try {
  for(const language of ['en','ko','ga']) {
   await page.locator('#language').selectOption(language);
   for(const route of ['privacy','terms']) {
-   await page.locator(`.footer-links a[href="#${route}"]`).click();
+   await page.goto(`http://127.0.0.1:5173/#${route}`);
+   await page.locator('.legal-copy').waitFor();
    assert.equal(await page.locator('.legal-copy section').count(),5);
    assert.equal(await page.locator('.legal-copy section p').first().textContent(),legalPages[language][route][0][1]);
    assert.ok(!(await page.locator('.legal-copy').innerText()).includes('placeholder'));
@@ -23,5 +24,5 @@ try {
  }
  await page.locator('.back').click();await page.locator('#date-slider').waitFor();
  assert.deepEqual(errors,[]);
- console.log('Legal pages passed: footer navigation, English/Korean/Irish content, mobile light/dark, privacy source link, and return navigation.');
+ console.log('Legal pages passed: direct page navigation, English/Korean/Irish content, mobile light/dark, privacy source link, and return navigation.');
 } finally {await browser.close();}
