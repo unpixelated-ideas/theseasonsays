@@ -172,15 +172,17 @@ export function activeOn(rows, annual, date) {
 }
 
 export function nextChange(rows, annual, date) {
-  const current = activeOn(rows, annual, date);
+  // Chuseok remains in activeOn for secondary recognition, not upcoming promotion.
+  const upcomingRows = rows.filter(period => period.id !== 'chuseok');
+  const current = activeOn(upcomingRows, annual, date);
   // Endings matter too: January 7 is a meaningful change without a new row.
   const candidates = [date.getFullYear() - 1, date.getFullYear(), date.getFullYear() + 1]
-    .flatMap(year => periodsForYear(rows, annual, year))
+    .flatMap(year => periodsForYear(upcomingRows, annual, year))
     .flatMap(period => [period.start, addDays(period.end, 1)])
     .filter(candidate => difference(candidate, date) > 0)
     .sort(difference);
   for (const candidate of candidates) {
-    const active = activeOn(rows, annual, candidate);
+    const active = activeOn(upcomingRows, annual, candidate);
     if (active.map(period => period.id).join() !== current.map(period => period.id).join()) {
       return {
         date: candidate, active,

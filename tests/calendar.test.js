@@ -1,6 +1,21 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
 import {parseCSV,parseColors,backgroundFor,paletteFor} from '../src/lib/csv.js';import {parseCalendar,parseAnnual,activeOn,nextChange,resolve,periodsForYear,validRule} from '../src/lib/calendar.js';import {fromKey,key,addDays,difference,daysInYear,easter} from '../src/lib/dates.js';import {site} from '../src/config/site.js';import {messages} from '../src/i18n/messages.js';
 const read=f=>readFileSync(new URL('../src/data/'+f,import.meta.url),'utf8');const rows=parseCalendar(read('calendar.csv')),annual=parseAnnual(read('annual-dates.csv'));const ids=s=>activeOn(rows,annual,fromKey(s)).map(p=>p.id);
+test('upcoming skips Chuseok while preserving secondary recognition',()=>{
+ for(const date of ['2026-09-01','2026-09-05']) {
+  const next=nextChange(rows,annual,fromKey(date));
+  assert.equal(key(next.date),'2026-09-07');
+  assert.equal(next.added[0].id,'late-summer');
+ }
+ assert.ok(ids('2026-09-05').includes('chuseok'));
+ for(const year of [2024,2025,2026,2027,2028]) {
+  const period=periodsForYear(rows,annual,year).find(p=>p.id==='chuseok');
+  for(const date of [addDays(period.start,-1),period.start,period.end]) {
+   const next=nextChange(rows,annual,date);
+   for(const field of ['active','added','ended'])assert.ok(!next[field].some(p=>p.id==='chuseok'));
+  }
+ }
+});
 for(const [date,yes,no] of [
  ['2026-01-01',['winter','holiday','new-year'],['autumn']],['2026-01-06',['winter','holiday','new-year'],[]],['2026-01-07',['winter'],['holiday','new-year']],['2026-02-14',['winter','valentine'],[]],['2026-02-15',['winter'],['valentine']],['2026-02-28',['winter'],[]],['2024-02-29',['winter'],[]],['2024-03-01',['winter','patrick'],[]],['2026-03-17',['winter','patrick'],[]],['2026-03-18',['winter','transition'],['patrick']],['2026-05-25',['spring','early-summer'],[]],['2026-06-19',['spring'],['juneteenth']],['2026-07-04',['summer','independence'],[]],['2026-07-05',['summer'],['independence']],['2026-09-07',['late-summer'],['summer']],['2026-09-30',['autumn'],[]],['2026-10-01',['autumn','halloween'],[]],['2026-10-31',['autumn','halloween'],[]],['2026-11-01',['autumn','thanksgiving'],['halloween']],['2026-11-26',['autumn','thanksgiving'],['holiday']],['2026-11-27',['autumn','holiday'],['thanksgiving']],['2026-11-30',['autumn','holiday'],[]],['2026-12-01',['autumn','holiday'],['winter']],['2026-12-21',['winter','holiday'],['autumn']],['2026-12-25',['winter','holiday'],['new-year']],['2026-12-26',['winter','holiday','new-year'],[]],['2026-12-31',['winter','holiday','new-year'],[]]
 ])test(`boundary ${date}`,()=>{const actual=ids(date);yes.forEach(id=>assert.ok(actual.includes(id),`${id} missing`));no.forEach(id=>assert.ok(!actual.includes(id),`${id} unexpected`));});

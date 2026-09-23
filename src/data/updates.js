@@ -21,6 +21,13 @@ export const updates = [
     ko: ['시제품 이름 “In Season”을 “계절이 말한다”로 변경했습니다.', '개인정보 처리방침과 이용약관 페이지를 만들었습니다.'],
     ga: ['Cuireadh “Deir an Séasúr” in ionad ainm na fréamhshamhla, “In Season”.', 'Cruthaíodh leathanaigh don Pholasaí Príobháideachais agus do na Téarmaí Seirbhíse.'],
   },
+  {
+    date: '2026-09-22',
+    version: 'v0.4',
+    en: ['Improved link previews for cleaner sharing in iMessage, Discord, and other supported apps.', 'Modified wording across each seasonal event to improve clarity.'],
+    ko: ['iMessage, Discord 및 기타 지원 앱에서 더 깔끔하게 공유할 수 있도록 링크 미리보기를 개선했습니다.', '각 계절 행사에 대한 문구를 더 명확하게 다듬었습니다.'],
+    ga: ['Feabhsaíodh réamhamhairc nasc chun comhroinnt níos slachtmhaire a dhéanamh in iMessage, Discord agus aipeanna eile a dtacaítear leo.', 'Athraíodh an fhoclaíocht do gach imeacht séasúrach chun í a dhéanamh níos soiléire.'],
+  },
 ];
 export const updateLabels = {
   en: { title: 'Update Log', close: 'Close' },
