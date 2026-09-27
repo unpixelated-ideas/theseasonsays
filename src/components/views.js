@@ -13,6 +13,11 @@ export const range=(p,t)=>{
 };
 
 function suggestions(period,lang,t,active) {
+  // Show date-wide clothing and drink guidance once, on the primary card.
+  period = {...period};
+  for (const [field, value] of Object.entries(period.guidance || {})) {
+    period[field] = [period[field], value].filter(Boolean).join(' | ');
+  }
   return [['permissible',t.allowed],['impermissible',t.notAllowed]].map(([prefix,title])=>{
     const items=contentItems(period,prefix,lang);
     if (prefix === 'impermissible' && !items.length) return '';

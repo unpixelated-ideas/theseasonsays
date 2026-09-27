@@ -35,6 +35,13 @@ export const updates = [
     ko: ['스마트폰에서 볼 때 허용 및 금지 섹션 사이에 구분선을 추가했습니다.'],
     ga: ['Cuireadh líne dheighilte idir na rannáin Ceadaithe agus Toirmiscthe agus an suíomh á fheiceáil ar fhón cliste.'],
   },
+  {
+    date: '2026-09-27',
+    version: 'v0.5',
+    en: ['Refined date slider usability', 'Clarified the nuances of overlapping seasons', 'Expanded the Allowed / Not Allowed guidance based on user feedback'],
+    ko: ['날짜 슬라이더의 사용성을 개선했습니다.', '겹치는 계절의 세부적인 차이를 더 명확히 했습니다.', '사용자 의견을 바탕으로 허용 / 허용되지 않음 안내를 확대했습니다.'],
+    ga: ['Feabhsaíodh inúsáidteacht an tsleamhnáin dáta.', 'Soiléiríodh na miondifríochtaí idir séasúir a fhorluíonn.', 'Leathnaíodh an treoir Ceadaithe / Ní cheadaítear bunaithe ar aiseolas úsáideoirí.'],
+  },
 ];
 export const updateLabels = {
   en: { title: 'Update Log', close: 'Close' },

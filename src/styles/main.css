@@ -58,3 +58,8 @@ summary .overlap-emoji{display:inline;margin:0 8px 0 0;font-size:1em;color:inher
 .footer-links > a { font-size:12px; text-decoration:none; line-height:2; min-height:44px; }
 .legal-copy h2 { font-size:24px; letter-spacing:0; padding-right:0; margin-top:28px; }
 .legal-copy .date-range { font-size:13px; }
+
+.slider-footer{position:relative;display:flex;align-items:center;justify-content:center;min-height:44px;color:var(--muted)}
+#slider-help{position:relative;top:-6px;font-size:11px;line-height:1.5;margin:0 64px;text-align:center;opacity:.8}
+.slider-footer button{position:absolute;top:0;min-height:44px;border:0;font-size:12px;padding:0 4px}
+#previous-year{left:0}#next-year{right:0}

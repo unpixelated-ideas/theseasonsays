@@ -95,12 +95,25 @@ export function resolve(rule, year, annual) {
 }
 
 export function periodsForYear(rows, annual, year) {
-  return rows.flatMap(row => {
+  return rows.filter(row => !['phase', 'guidance'].includes(row.category)).flatMap(row => {
     const start = resolve(row.start_rule, year, annual);
     let end = resolve(row.end_rule, year, annual);
     if (!start || !end) return [];
     if (difference(end, start) < 0) end = resolve(row.end_rule, year + 1, annual);
-    return end ? [{ ...row, start, end }] : [];
+    if (!end) return [];
+    const phases = rows.filter(phase => phase.parent_id === row.id);
+    if (!phases.length) return [{ ...row, start, end }];
+    return phases.flatMap(phase => {
+      let phaseStart = resolve(phase.start_rule, year, annual);
+      if (phaseStart && difference(phaseStart, start) < 0) phaseStart = resolve(phase.start_rule, year + 1, annual);
+      if (!phaseStart) return [];
+      let phaseEnd = resolve(phase.end_rule, phaseStart.getFullYear(), annual);
+      if (phaseEnd && difference(phaseEnd, phaseStart) < 0) phaseEnd = resolve(phase.end_rule, phaseStart.getFullYear() + 1, annual);
+      if (!phaseEnd || difference(phaseStart, end) > 0) return [];
+      const copy = Object.fromEntries(Object.entries(phase).filter(([field]) => /^(name|description)_/.test(field)));
+      return [{ ...row, ...copy, phaseId: phase.id, seasonStart: start,
+        start: phaseStart, end: difference(phaseEnd, end) > 0 ? end : phaseEnd }];
+    });
   }).sort((a, b) => difference(a.start, b.start) || Number(b.priority) - Number(a.priority));
 }
 
@@ -128,11 +141,6 @@ export function activeOn(rows, annual, date) {
         }
         return result;
       }
-      // Holiday Season has no restrictions during November.
-      if (period.id === 'holiday' && date.getMonth() === 10) {
-        return Object.fromEntries(Object.entries(period).map(([field, value]) =>
-          [field, /^impermissible_(decor|food|activities|media)_/.test(field) ? '' : value]));
-      }
       // An explicitly dated override reuses another row's maintained content.
       if (period.impermissible_override_start_rule && period.impermissible_override_source) {
         const start = resolve(period.impermissible_override_start_rule, date.getFullYear(), annual);
@@ -158,19 +166,40 @@ export function activeOn(rows, annual, date) {
         }
       }
       if (!period.impermissible_end_rule) return period;
-      let cutoff = resolve(period.impermissible_end_rule, period.start.getFullYear(), annual);
+      let cutoff = resolve(period.impermissible_end_rule, (period.seasonStart || period.start).getFullYear(), annual);
       // Winter starts in December; its January cutoff belongs to the next year.
-      if (cutoff && difference(cutoff, period.start) < 0) {
-        cutoff = resolve(period.impermissible_end_rule, period.start.getFullYear() + 1, annual);
+      if (cutoff && difference(cutoff, period.seasonStart || period.start) < 0) {
+        cutoff = resolve(period.impermissible_end_rule, (period.seasonStart || period.start).getFullYear() + 1, annual);
       }
       if (!cutoff || difference(date, cutoff) <= 0) return period;
       // Clear only this resolved instance; the editable CSV record stays intact.
       return Object.fromEntries(Object.entries(period).map(([field, value]) =>
         [field, /^impermissible_(decor|food|activities|media)_/.test(field) ? '' : value]));
     })
-    .sort((a, b) => Number(b.priority) - Number(a.priority));
+    .sort((a, b) => Number(b.priority) - Number(a.priority))
+    .map((period, index) => index ? period : { ...period, guidance: guidanceOn(rows, annual, date) });
 }
 
+// Guidance uses the same date rules and localized content columns as seasonal rows.
+export function guidanceOn(rows, annual, date) {
+  const result = {};
+  for (const row of rows.filter(row => row.category === 'guidance')) {
+    const active = [date.getFullYear() - 1, date.getFullYear()].some(year => {
+      const start = resolve(row.start_rule, year, annual);
+      let end = resolve(row.end_rule, year, annual);
+      if (start && end && difference(end, start) < 0) end = resolve(row.end_rule, year + 1, annual);
+      return start && end && difference(date, start) >= 0 && difference(end, date) >= 0;
+    });
+    for (const [field, value] of Object.entries(row)) {
+      if (!value || !/^permissible_(decor|food|activities|media)_/.test(field)) continue;
+      const target = active ? field : field.replace('permissible_', 'impermissible_');
+      result[target] = [result[target], value].filter(Boolean).join(' | ');
+    }
+  }
+  return result;
+}
+
+const identity = period => period.phaseId || period.id;
 export function nextChange(rows, annual, date) {
   // Chuseok remains in activeOn for secondary recognition, not upcoming promotion.
   const upcomingRows = rows.filter(period => period.id !== 'chuseok');
@@ -183,11 +212,11 @@ export function nextChange(rows, annual, date) {
     .sort(difference);
   for (const candidate of candidates) {
     const active = activeOn(upcomingRows, annual, candidate);
-    if (active.map(period => period.id).join() !== current.map(period => period.id).join()) {
+    if (active.map(identity).join() !== current.map(identity).join()) {
       return {
         date: candidate, active,
-        added: active.filter(period => !current.some(old => old.id === period.id)),
-        ended: current.filter(period => !active.some(next => next.id === period.id)),
+        added: active.filter(period => !current.some(old => identity(old) === identity(period))),
+        ended: current.filter(period => !active.some(next => identity(next) === identity(period))),
         days: difference(candidate, date),
       };
     }

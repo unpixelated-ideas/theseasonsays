@@ -39,13 +39,13 @@ The localized **`productName` map in `src/config/site.js`** defines the product 
 
 ## Editing `calendar.csv`
 
-Save as UTF-8 CSV with the header intact. A spreadsheet editor or plain-text editor works. Every row is one inclusive seasonal period. Multiple rows may be active together; they are never forced into mutually exclusive holidays.
+Save as UTF-8 CSV with the header intact. A spreadsheet editor or plain-text editor works. Rows describe inclusive seasonal periods, their presentation phases, or date-wide guidance. Multiple rows may be active together; they are never forced into mutually exclusive holidays.
 
 | Columns | Meaning |
 | --- | --- |
 | `id` | Required unique stable identifier. Used for comparisons; not shown to visitors. |
 | `name_en`, `name_ko`, `name_ga` | Names in English, Korean, and Irish. Populate all three for complete localization. |
-| `category` | `season`, `holiday`, `transition`, or `recognition`. Broad seasons coexist with other categories. |
+| `category` | `season`, `holiday`, `transition`, `recognition`, `phase`, or `guidance`. Broad seasons coexist with other categories. |
 | `start_rule`, `end_rule` | Required inclusive boundaries, using the rule syntax below. |
 | `priority` | Numeric prominence. Higher numbers appear first in the primary card. This does not remove other periods. |
 | `emoji` | Optional single seasonal symbol. Symbols appear in the primary card and the Also in Season headings. |
@@ -53,6 +53,7 @@ Save as UTF-8 CSV with the header intact. A spreadsheet editor or plain-text edi
 | `permissible_{decor,food,activities,media}_{en,ko,ga}` | Optional suggestions, split into the four content groups and three languages. |
 | `impermissible_{decor,food,activities,media}_{en,ko,ga}` | Optional future “for later” guidance. Intentionally blank in this prototype. No prohibitions have been invented. |
 | `notes` | Internal editorial notes; not rendered. |
+| `parent_id` | For a `phase` row, the broad season ID whose activation, priority, emoji, and content rules it inherits. |
 
 Content fields can safely remain blank. The UI omits empty groups. Keep translated content aligned; it does not translate English on the fly or silently insert English into other languages.
 
@@ -178,3 +179,16 @@ St. Patrick’s Day allows the fourteen approved items. Winter reuses them as No
 Chuseok’s Allowed list contains the eleven approved harvest and Korean cultural items. Lunar New Year’s Allowed list contains the eight approved New Year items, including tteokguk. Both lists are translated into Korean and Irish; Chuseok retains its secondary priority.
 
 Spring, Easter, Late Spring, Summer, U.S. Independence Day, and Late Summer now have the requested Allowed lists, translated into Korean and Irish. The period names are `Late Spring` and `U.S. Independence Day`.
+
+
+### v0.5 phases and date exploration
+
+Autumn, Holiday Season, and Winter retain their broad CSV rows as the activation and content sources. Their `category=phase` rows supply localized names, descriptions, and inclusive date rules via `parent_id`. The calendar engine resolves phases inside the parent period, using maintained local astronomical dates and the existing cross-year date arithmetic. Resolved instances retain the parent ID for content sharing and carry a separate `phaseId` for change detection. Primary cards, expandable overlaps, upcoming changes, and the annual reference all use these resolved phases.
+
+The autumn phases begin at the autumn equinox, October 1, and October 21. Holiday phases divide at December 26. Winter phases divide at February 1, February 15, March 1, and March 18; the February end rule `03-01-1` includes leap day automatically. Existing finer-grained autumn rules (October restrictions, Thanksgiving, Black Friday gray areas, and December's winter-oriented content) remain in effect within Mid to Late Autumn. Phase ranges describe the requested presentation windows; those existing cultural overlays can still change their content within a window. Holiday Season now keeps New Year’s items Not Allowed in November as well as December, until December 26.
+
+`category=guidance` rows use the same date-rule resolver and localized content columns. They are merged into the primary card’s existing Allowed / Not Allowed lists once, without creating extra seasonal cards. Summery white attire means distinctly summery white clothing, allowed inclusively from calculated Memorial Day through Labor Day; it is not a restriction on all white clothing. Clear/light spirits run May 1–September 30 (gin, vodka, blanco tequila, light rum, spritzes, highballs, and bright citrus-forward drinks). Amber/dark spirits run October 1–April 30 (whiskey, bourbon, cognac, aged rum, Manhattans, Old Fashioneds, and richer drinks). Outside each guidance window the same translated item appears under Not Allowed.
+
+The centered slider helper is translated in all three languages. Only January 1 reveals the previous-year control; only December 31 reveals the next-year control. Clicking crosses one civil day, synchronizes the heading, picker, slider, colors, and cards, and returns keyboard focus to the slider. Navigation stops at the maintained 2024–2028 limits rather than inventing missing astronomical/lunar data.
+
+`tests/phases.test.js` covers the phase boundaries, all supported days, translations, cross-year and leap-year behavior, guidance transitions, overlapping names, upcoming phase changes, and the three-item v0.5 update-log entry. `scripts/phases-browser-check.mjs` checks endpoint navigation, range limits, responsive layout, themes, and languages with the same optional Playwright configuration as the other browser checks.

@@ -14,10 +14,10 @@ test('actual Halloween and Thanksgiving overlap with Autumn in every language',(
   for(const lang of ['en','ko','ga']) {
    const items=allowedItemsWithOverlaps(active[0],active,lang);
    assert.equal(items.filter(item=>item.matches.length).length,10);
-   assert.deepEqual(items.find(item=>item.key==='pumpkin spice').matches,[{id:'autumn',name:rows.find(r=>r.id==='autumn')[`name_${lang}`]}]);
+   assert.deepEqual(items.find(item=>item.key==='pumpkin spice').matches,[{id:'autumn',name:active.find(r=>r.id==='autumn')[`name_${lang}`]}]);
    const html=currentCard(active,lang,messages[lang]);
    assert.equal((html.match(/class="overlap-button"/g)||[]).length,10);
-   assert.ok(html.includes(overlapCopy[lang].alsoIn(rows.find(r=>r.id==='autumn')[`name_${lang}`])));
+   assert.ok(html.includes(overlapCopy[lang].alsoIn(active.find(r=>r.id==='autumn')[`name_${lang}`])));
    assert.ok(!html.split('class="overlaps"')[1].includes('overlap-button'));
   }
  }

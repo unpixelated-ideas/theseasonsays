@@ -48,7 +48,7 @@ test('reset contains only approved seasonal lists and no automatic drafts',()=>{
   assert.equal(contentItems(late,'impermissible',language).length,11);
   assert.deepEqual(new Set(contentItems(late,'impermissible',language)),new Set([...contentItems(autumn,'permissible',language),contentItems(rows.find(r=>r.id==='halloween'),'permissible',language)[0]]));
   for(const row of rows)for(const prefix of ['permissible','impermissible']){
-   const expected=row.id==='black-friday'&&prefix==='permissible'?21:row.id==='spring'&&prefix==='permissible'?5:row.id==='easter'&&prefix==='permissible'?11:row.id==='early-summer'&&prefix==='permissible'?7:row.id==='summer'&&prefix==='permissible'?13:row.id==='independence'&&prefix==='permissible'?10:row.id==='late-summer'&&prefix==='permissible'?11:row.id==='late-summer'&&prefix==='impermissible'?11:row.id==='autumn'?(prefix==='permissible'?10:13):row.id==='halloween'?(prefix==='permissible'?13:8):row.id==='thanksgiving'?(prefix==='permissible'?18:20):row.id==='holiday'?(prefix==='permissible'?21:18):row.id==='new-year'&&prefix==='permissible'?18:row.id==='winter'?(prefix==='permissible'?4:11):row.id==='valentine'&&prefix==='permissible'?11:row.id==='patrick'&&prefix==='permissible'?14:row.id==='chuseok'&&prefix==='permissible'?11:row.id==='lunar'&&prefix==='permissible'?8:0;
+   const expected=row.category==='guidance'?(prefix==='permissible'?1:0):row.id==='black-friday'&&prefix==='permissible'?21:row.id==='spring'&&prefix==='permissible'?5:row.id==='easter'&&prefix==='permissible'?11:row.id==='early-summer'&&prefix==='permissible'?7:row.id==='summer'&&prefix==='permissible'?13:row.id==='independence'&&prefix==='permissible'?10:row.id==='late-summer'&&prefix==='permissible'?11:row.id==='late-summer'&&prefix==='impermissible'?11:row.id==='autumn'?(prefix==='permissible'?10:13):row.id==='halloween'?(prefix==='permissible'?13:8):row.id==='thanksgiving'?(prefix==='permissible'?18:20):row.id==='holiday'?(prefix==='permissible'?21:18):row.id==='new-year'&&prefix==='permissible'?18:row.id==='winter'?(prefix==='permissible'?4:11):row.id==='valentine'&&prefix==='permissible'?11:row.id==='patrick'&&prefix==='permissible'?14:row.id==='chuseok'&&prefix==='permissible'?11:row.id==='lunar'&&prefix==='permissible'?8:0;
    const count = row.id==='halloween' && prefix==='permissible' ? 23 : expected;
    assert.equal(contentItems(row,prefix,language).length,count,`${row.id}: ${prefix}`);
   }
@@ -83,7 +83,7 @@ test('Holiday restrictions end December 25 and do not return in January',()=>{
  for(const language of ['en','ko','ga']) {
   const expected=contentItems(rows.find(r=>r.id==='new-year'),'permissible',language);
   assert.equal(expected.length,18);
-  for(const [year,month,day,count] of [[2026,11,27,0],[2026,11,30,0],[2026,12,1,18],[2026,12,25,18],[2026,12,26,0],[2026,12,31,0],[2027,1,1,0],[2027,1,6,0]]) {
+  for(const [year,month,day,count] of [[2026,11,27,18],[2026,11,30,18],[2026,12,1,18],[2026,12,25,18],[2026,12,26,0],[2026,12,31,0],[2027,1,1,0],[2027,1,6,0]]) {
    const active=activeOn(rows,annual,new Date(year,month-1,day,12));
    const holiday=active.find(r=>r.id==='holiday');
    assert.deepEqual(contentItems(holiday,'impermissible',language),count?expected:[]);
