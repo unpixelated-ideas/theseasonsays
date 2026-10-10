@@ -28,7 +28,7 @@ The build copies the static application into `dist/` and inserts the configured 
 - `src/data/annual-dates.csv`: maintained astronomical instants and Korean lunar holiday dates.
 - `src/lib/`: CSV validation, local civil-date arithmetic, and calendar engine.
 - `src/i18n/messages.js`: English, Korean, and Irish UI copy and countdown wording.
-- `src/components/views.js`: reusable card and annual-calendar rendering.
+- `src/components/views.js`: reusable homepage card rendering; `src/components/timeline.js` renders the Seasonal Timeline.
 - `src/main.js`: application state, date controls, routing, live clock, preferences.
 - `src/styles/main.css`: responsive light/dark design, without shadows or gradients.
 - `tests/calendar.test.js`: calendar, validation, localization, and leap-year tests.
@@ -116,11 +116,11 @@ CSV warnings identify the file and row for invalid calendar rules, duplicate IDs
 
 The calendar picker and native keyboard/touch slider are synchronized. The slider follows the selected year's 365 or 366 days. Native date controls may follow the browser/OS language for their internal picker chrome; application labels and formatted dates use the selected site language. Language never changes the visitor's time zone. Irish date names are bundled explicitly so browsers without Irish locale data cannot fall back to English. Time-zone labels use localized names and an accurate UTC offset; untranslated IANA identifiers are not displayed. Unknown zones fall back to a localized local-time-zone label if the browser lacks a translation.
 
-The annual view derives from the same period instances as the home page and clips cross-year ranges to its displayed year. The next card considers both starts and ends, so January 7 and post-holiday resets are recognized. All five footer labels are currently disabled and show a not-allowed cursor. The underlying annual-calendar and placeholder routes remain available by direct URL for future reactivation; feedback has no submission backend.
+The Seasonal Timeline (`#complete`) derives from the shared calendar engine, includes broad seasons, phases, holidays, and transitions, and preserves full cross-year ranges. The next card considers both starts and ends, so January 7 and post-holiday resets are recognized. About, Privacy Policy, Terms of Service, and Feedback are active footer links. Seasonal Timeline is an active footer link. The footer Feedback link opens the language-specific Google Form directly, configured in `src/config/site.js`.
 
 ## Tests
 
-`npm test` runs 38 tests, including the specified seasonal boundaries, every supported day's broad-season coverage, movable holidays, cross-year overlaps, malformed CSV, duplicate identifiers/dates, leap day, color fallbacks, and translation completeness. For time-zone coverage:
+`npm test` runs the automated tests, including the specified seasonal boundaries, every supported day's broad-season coverage, movable holidays, cross-year overlaps, malformed CSV, duplicate identifiers/dates, leap day, color fallbacks, and translation completeness. For time-zone coverage:
 
 ```sh
 TZ=America/New_York npm test
@@ -146,7 +146,7 @@ The pathname controls language and overrides `guide-language` in localStorage, i
 
 For another static host, run `npm run build` and publish only `dist/`; generated output should not be committed. Navigation discovers the host's mount point from the shared module URL. Canonical/social URLs intentionally continue to identify the official production site; update site configuration if moving it. Both `npm run dev` and `node scripts/dev.mjs --dist` serve localized entries, shared assets, and the PNG image.
 
-Before public release, review Korean and Irish editorial copy with fluent speakers and replace the placeholder legal/feedback pages as appropriate.
+Before public release, review Korean and Irish editorial copy with fluent speakers and review the legal terms for your circumstances and provide a public privacy contact method. The feedback page links to a Google Form in the selected language.
 
 ## Update log
 
@@ -192,3 +192,26 @@ The autumn phases begin at the autumn equinox, October 1, and October 21. Holida
 The centered slider helper is translated in all three languages. Only January 1 reveals the previous-year control; only December 31 reveals the next-year control. Clicking crosses one civil day, synchronizes the heading, picker, slider, colors, and cards, and returns keyboard focus to the slider. Navigation stops at the maintained 2024–2028 limits rather than inventing missing astronomical/lunar data.
 
 `tests/phases.test.js` covers the phase boundaries, all supported days, translations, cross-year and leap-year behavior, guidance transitions, overlapping names, upcoming phase changes, and the three-item v0.5 update-log entry. `scripts/phases-browser-check.mjs` checks endpoint navigation, range limits, responsive layout, themes, and languages with the same optional Playwright configuration as the other browser checks.
+
+
+### Legal pages
+
+Privacy Policy and Terms of Service use the existing `#privacy` and `#terms` routes, with translated footer links on every page. English uses `/#privacy` and `/#terms`, Korean `/ko/#privacy` and `/ko/#terms`, and Irish `/ga/#privacy` and `/ga/#terms` (beneath the GitHub Pages `/theseasonsays/` base). These fragments work on direct visits and refresh without server rewrites. The language selector keeps the current fragment, and return links retain the language pathname.
+
+The legal text lives in `src/i18n/legal.js`. Its fixed October 10, 2026 date should change only for substantive revisions. The privacy audit found localStorage entries `guide-appearance` and `guide-language`, browser-local date/time/time-zone and system-theme processing, and same-origin CSV/module/style requests. The URL determines language; the saved language entry does not override it. No application cookies, sessionStorage, analytics, profiling, external scripts/fonts, payment collection, or location API were found. GitHub hosting processes technical request information separately, as disclosed in the policy. No repository license file was found; the terms preserve any applicable licenses and third-party rights without inventing a license.
+
+Owner review: provide a public contact method for privacy questions (none is currently published; the policy says so), confirm the terms fit your circumstances, and have fluent Korean and Irish speakers review the translations. Run `node scripts/legal-browser-check.mjs` with the built preview server and the optional Playwright configuration described above.
+
+
+### About page
+
+The translated About page uses `#about` at each existing language path, including beneath the GitHub Pages mount point. Its copy lives in `src/i18n/about.js` and its semantic article in `src/components/about.js`. The footer, return link, and brand link retain the current language and query parameters; switching language keeps the About route. The reading card shares the existing theme and responsive styles. Run `node scripts/about-browser-check.mjs` with the preview server and optional Playwright configuration described above to check all three translations, emphasis, direct visits and refresh, query preservation, navigation/history, screen sizes, and themes.
+
+
+### Seasonal Timeline
+
+The page title carries a localized Beta label, and Current year sits beneath the selected year. The year selector starts at the visitor’s current local year independently of the homepage’s selected date. Arrows, direct year selection, and Current year cover the maintained 2024–2028 range. Extend the annual date data and configured limits together to support more years. A separate Today marker is inserted among entries by start date only in the current year; ongoing experiences retain their overlapping ranges.
+
+`timelineForYear` requests parent periods from `periodsForYear`, also including periods carried over from the previous year. The broad Holiday Season celebration is hidden on the timeline; its Holiday Season and Late Holiday Season stages remain. Homepage calls retain the default phase-only behavior. Phase emojis inherit from their parent, matching the homepage; guidance rows remain in homepage suggestions and are not separate timeline cards. Card tints reuse the daily palette at each period’s start with stable readable text in both themes. Names and descriptions come directly from CSV translations; controls use `messages` and the supported-language registry.
+
+Each card links to `#home?date=YYYY-MM-DD`, preserving the language path and supporting refresh, sharing, and browser history. Full original start dates are retained even for carryover entries beginning before the maintained exploration range. Date changes on the homepage clear this initial deep-link date. Tests in `tests/timeline.test.js` verify all definitions, daily homepage coverage, ordering, year boundaries, leap day, movable rules, translations, and Today placement. `scripts/timeline-browser-check.mjs` checks navigation, themes, and responsive layouts using the optional Playwright setup above.

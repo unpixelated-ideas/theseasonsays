@@ -42,6 +42,13 @@ export const updates = [
     ko: ['날짜 슬라이더의 사용성을 개선했습니다.', '겹치는 계절의 세부적인 차이를 더 명확히 했습니다.', '사용자 의견을 바탕으로 허용 / 허용되지 않음 안내를 확대했습니다.'],
     ga: ['Feabhsaíodh inúsáidteacht an tsleamhnáin dáta.', 'Soiléiríodh na miondifríochtaí idir séasúir a fhorluíonn.', 'Leathnaíodh an treoir Ceadaithe / Ní cheadaítear bunaithe ar aiseolas úsáideoirí.'],
   },
+  {
+    date: '2026-10-10',
+    version: 'v0.6',
+    en: ['Privacy Policy updated', 'Terms of Service updated', 'About page populated', 'Feedback pages created', 'Complete calendar rebranded as Seasonal Timeline page and populated with information.', 'Distinctive emoji picked for each different event'],
+    ko: ['개인정보 처리방침을 업데이트했습니다.', '이용약관을 업데이트했습니다.', '소개 페이지에 내용을 추가했습니다.', '피드백 페이지를 만들었습니다.', '전체 달력의 이름을 계절 타임라인 페이지로 변경하고 정보를 추가했습니다.', '각 행사마다 고유한 이모지를 선정했습니다.'],
+    ga: ['Nuashonraíodh an Polasaí Príobháideachais.', 'Nuashonraíodh na Téarmaí Seirbhíse.', 'Cuireadh ábhar leis an leathanach Maidir Linn.', 'Cruthaíodh leathanaigh aiseolais.', 'Athainmníodh an féilire iomlán mar leathanach Amlíne na Séasúr agus cuireadh eolas leis.', 'Roghnaíodh emoji ar leith do gach imeacht.'],
+  },
 ];
 export const updateLabels = {
   en: { title: 'Update Log', close: 'Close' },

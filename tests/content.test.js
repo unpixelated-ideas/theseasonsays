@@ -61,7 +61,7 @@ test('reset contains only approved seasonal lists and no automatic drafts',()=>{
   assert.ok(!html.includes('restriction-draft'));
  }
  assert.deepEqual(contentItems(rows.find(r=>r.id==='holiday'),'permissible','en'),['Holiday décor', 'Holiday trees', 'Holiday lights', 'Holiday wreaths', 'Holiday stockings', 'Santa Claus', 'Reindeer', 'Candy canes', 'Gingerbread houses', 'Holiday ornaments', 'Mistletoe', 'Holly', 'Poinsettias', 'Snowmen', 'Snowflakes', 'Snow-covered scenery', 'Winter village décor', '“Winter Wonderland” décor', 'Eggnog', 'Holiday music', 'Holiday films']);
- assert.deepEqual(contentItems(rows.find(r=>r.id==='halloween'),'permissible','en').slice(0,13),['Halloween décor', 'Jack-o’-lanterns', 'Ghosts', 'Witches', 'Bats', 'Black cats', 'Skeletons', 'Spiderwebs', 'Haunted houses', 'Candy', 'Candy corn', 'Costumes', 'Candles']);
+ assert.deepEqual(contentItems(rows.find(r=>r.id==='halloween'),'permissible','en').slice(0,13),['Halloween décor', 'Jack-o’-lanterns', 'Ghosts', 'Witches', 'Bats', 'Black cats', 'Skeletons', 'Spiderwebs', 'Haunted houses', 'Halloween candy', 'Candy corn', 'Costumes', 'Candles']);
  assert.deepEqual(contentItems(rows.find(r=>r.id==='halloween'),'impermissible','en'),['Thanksgiving décor', 'Turkeys', 'Cornucopias', 'Pilgrims', '“Give Thanks” décor', '“Happy Thanksgiving” décor', 'Thanksgiving table settings', 'Thanksgiving dinner imagery']);
 });
 

@@ -94,8 +94,8 @@ export function resolve(rule, year, annual) {
   return addDays(date, Number(offset || 0));
 }
 
-export function periodsForYear(rows, annual, year) {
-  return rows.filter(row => !['phase', 'guidance'].includes(row.category)).flatMap(row => {
+export function periodsForYear(rows, annual, year, { includeParents = false, includeGuidance = false } = {}) {
+  return rows.filter(row => row.category !== 'phase' && (includeGuidance || row.category !== 'guidance')).flatMap(row => {
     const start = resolve(row.start_rule, year, annual);
     let end = resolve(row.end_rule, year, annual);
     if (!start || !end) return [];
@@ -103,7 +103,7 @@ export function periodsForYear(rows, annual, year) {
     if (!end) return [];
     const phases = rows.filter(phase => phase.parent_id === row.id);
     if (!phases.length) return [{ ...row, start, end }];
-    return phases.flatMap(phase => {
+    return [...(includeParents ? [{ ...row, start, end }] : []), ...phases.flatMap(phase => {
       let phaseStart = resolve(phase.start_rule, year, annual);
       if (phaseStart && difference(phaseStart, start) < 0) phaseStart = resolve(phase.start_rule, year + 1, annual);
       if (!phaseStart) return [];
@@ -111,10 +111,21 @@ export function periodsForYear(rows, annual, year) {
       if (phaseEnd && difference(phaseEnd, phaseStart) < 0) phaseEnd = resolve(phase.end_rule, phaseStart.getFullYear() + 1, annual);
       if (!phaseEnd || difference(phaseStart, end) > 0) return [];
       const copy = Object.fromEntries(Object.entries(phase).filter(([field]) => /^(name|description)_/.test(field)));
-      return [{ ...row, ...copy, phaseId: phase.id, seasonStart: start,
+      return [{ ...row, ...copy, emoji: phase.emoji || row.emoji, phaseId: phase.id, seasonStart: start,
         start: phaseStart, end: difference(phaseEnd, end) > 0 ? end : phaseEnd }];
-    });
+    })];
   }).sort((a, b) => difference(a.start, b.start) || Number(b.priority) - Number(a.priority));
+}
+
+// Retain actual cross-year boundaries; Holiday Season is shown through its stages.
+export function timelineForYear(rows, annual, year) {
+  const first = localDate(year, 1, 1), last = localDate(year, 12, 31);
+  return [year - 1, year].flatMap(anchor => periodsForYear(rows, annual, anchor,
+    { includeParents: true }))
+    .filter(period => period.id !== 'holiday' || period.phaseId)
+    .filter(period => difference(period.end, first) >= 0 && difference(last, period.start) >= 0)
+    .sort((a, b) => difference(a.start, b.start) || Boolean(a.phaseId) - Boolean(b.phaseId)
+      || Number(b.priority) - Number(a.priority));
 }
 
 export function activeOn(rows, annual, date) {

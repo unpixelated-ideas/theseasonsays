@@ -1,5 +1,6 @@
 export const site = {
   defaultLanguage:'en',
+  feedbackForms:{en:'https://forms.gle/TR5WaPY5x54ydN3b6',ga:'https://forms.gle/c3wNdESCLRCRKVAdA',ko:'https://forms.gle/CDfqyY21hPFvMMQ77'},
   languageRoutes:{en:'',ko:'ko',ga:'ga'},
   productionBaseURL:'https://unpixelated-ideas.github.io/theseasonsays/',
   previewImage:'previewimage.png',
