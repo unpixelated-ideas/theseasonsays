@@ -64,5 +64,5 @@ test('guidance has complementary spirits and dynamically dated summer whites in 
 test('v0.5 contains exactly the requested three updates in every language',()=>{
  const entry=updates.find(p=>p.version==='v0.5');assert.equal(entry.date,'2026-09-27');
  for(const lang of ['en','ko','ga'])assert.equal(entry[lang].length,3);
- assert.deepEqual(entry.en,['Refined date slider usability','Clarified the nuances of overlapping seasons','Expanded the Allowed / Not Allowed guidance based on user feedback']);
+ assert.deepEqual(entry.en,['Made the date slider easier to navigate.','Improved how the site explains overlapping seasons and traditions.','Expanded the Allowed and Not Allowed sections based on user feedback.']);
 });

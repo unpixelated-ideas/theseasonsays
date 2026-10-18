@@ -81,16 +81,20 @@ To add a period, copy a row, assign a new ID, provide its dates and three transl
 
 ### Annual astronomical and lunar data
 
-The maintained exploration range is **2024–2028**, including leap years. `annual-dates.csv` has `year,event,date` columns. Astronomical dates are UTC instants (`YYYY-MM-DDTHH:mm:00Z`), converted to the visitor's **local calendar date**. That whole local date starts the seasonal period: this is a date-based almanac, not an instant-based astronomy clock. Lunar holidays are Korean civil dates (`YYYY-MM-DD`) and never shifted into another time zone.
+The maintained exploration range is **1900–2127**, including leap years. `annual-dates.csv` has `year,event,date` columns. Astronomical dates are UTC instants (`YYYY-MM-DDTHH:mm:00Z`), converted to the visitor's **local calendar date**. That whole local date starts the seasonal period: this is a date-based almanac, not an instant-based astronomy clock. Lunar holidays are Korean civil dates (`YYYY-MM-DD`) and never shifted into another time zone.
 
-Sources for maintenance:
+Sources for maintenance (the original curated 2024–2028 records are preserved):
 
 - [National Weather Service astronomical seasons, 2025–2030](https://www.weather.gov/dvn/Climate_Astronomical_Seasons), including UTC times.
 - [U.S. Naval Observatory season data](https://aa.usno.navy.mil/data/Earth_Seasons), including the 2024 boundaries.
 - [Korea Astronomy and Space Science Institute calendar data](https://astro.kasi.re.kr/kor/life/post/calendarData) for Korean lunar holidays. Future calendar publications can be provisional.
 - [KASI's explanation of Korean/Chinese lunar-date differences](https://www.kasi.re.kr/publication/post/newsMaterial/2151): Korean Seollal is February 7 in 2027, not the Chinese date of February 6.
 
-Extend the annual CSV and `minYear`/`maxYear` in site configuration together. Include the following year's spring for winter periods that cross the upper boundary. The extra 2029 spring entry supports winter starting December 2028. Add neighboring-year lunar dates if extending countdown support beyond the displayed range. Missing annual events are omitted; dates outside the supported range display a notice rather than inventing astronomical or lunar dates. The device clock itself always works.
+Expanded dates use [Astronomy Engine v2.1.19](https://github.com/cosinekitty/astronomy/releases/tag/v2.1.19) for equinoxes and solstices, rounded to the nearest UTC minute. Korean lunar holidays through 2050 use the [Korean lunar calendar reference table](https://github.com/usingsky/korean_lunar_calendar_py). For 2051–2128 they are **calculated projections** using Node's ICU Dangi calendar in Asia/Seoul, with ordinary lunar month 1/day 1 and month 8/day 15 (excluding leap months). These are not official future KASI publications and should be checked as official calendars become available. Astronomical times far into the future also depend on predicted Earth rotation. Historical years apply today's seasonal and holiday rules retrospectively; they do not model when holidays were established or historical changes to holiday laws.
+
+Regenerate with `node scripts/extend-annual-dates.mjs /path/to/astronomy.cjs /path/to/korean_lunar_calendar.py [python3]`. Generation used Node 24.19.0 / ICU 78.3; runtime versions can affect projected lunar dates. The converters are maintenance inputs only: the site ships the static CSV without new runtime dependencies.
+
+Extend the annual CSV and `minYear`/`maxYear` in site configuration together. Include the following year's spring for winter periods that cross the upper boundary. The CSV includes complete 1899 and 2128 buffer years for carryover periods and next-year countdowns. Add neighboring-year lunar dates if extending countdown support beyond the displayed range. Missing annual events are omitted; dates outside the supported range display a notice rather than inventing astronomical or lunar dates. The device clock itself always works.
 
 ## Editing `daily-colors.csv`
 
@@ -189,7 +193,7 @@ The autumn phases begin at the autumn equinox, October 1, and October 21. Holida
 
 `category=guidance` rows use the same date-rule resolver and localized content columns. They are merged into the primary card’s existing Allowed / Not Allowed lists once, without creating extra seasonal cards. Summery white attire means distinctly summery white clothing, allowed inclusively from calculated Memorial Day through Labor Day; it is not a restriction on all white clothing. Clear/light spirits run May 1–September 30 (gin, vodka, blanco tequila, light rum, spritzes, highballs, and bright citrus-forward drinks). Amber/dark spirits run October 1–April 30 (whiskey, bourbon, cognac, aged rum, Manhattans, Old Fashioneds, and richer drinks). Outside each guidance window the same translated item appears under Not Allowed.
 
-The centered slider helper is translated in all three languages. Only January 1 reveals the previous-year control; only December 31 reveals the next-year control. Clicking crosses one civil day, synchronizes the heading, picker, slider, colors, and cards, and returns keyboard focus to the slider. Navigation stops at the maintained 2024–2028 limits rather than inventing missing astronomical/lunar data.
+The centered slider helper is translated in all three languages. Only January 1 reveals the previous-year control; only December 31 reveals the next-year control. Clicking crosses one civil day, synchronizes the heading, picker, slider, colors, and cards, and returns keyboard focus to the slider. Navigation stops at the maintained 1900–2127 limits rather than inventing missing astronomical/lunar data.
 
 `tests/phases.test.js` covers the phase boundaries, all supported days, translations, cross-year and leap-year behavior, guidance transitions, overlapping names, upcoming phase changes, and the three-item v0.5 update-log entry. `scripts/phases-browser-check.mjs` checks endpoint navigation, range limits, responsive layout, themes, and languages with the same optional Playwright configuration as the other browser checks.
 
@@ -210,8 +214,12 @@ The translated About page uses `#about` at each existing language path, includin
 
 ### Seasonal Timeline
 
-The page title carries a localized Beta label, and Current year sits beneath the selected year. The year selector starts at the visitor’s current local year independently of the homepage’s selected date. Arrows, direct year selection, and Current year cover the maintained 2024–2028 range. Extend the annual date data and configured limits together to support more years. A separate Today marker is inserted among entries by start date only in the current year; ongoing experiences retain their overlapping ranges.
+The page title carries a localized Beta label, and Current year sits beneath the selected year. The year selector starts at the visitor’s current local year independently of the homepage’s selected date. Arrows, direct year selection, and Current year cover the maintained 1900–2127 range. Extend the annual date data and configured limits together to support more years. A separate Today marker is inserted among entries by start date only in the current year; ongoing experiences retain their overlapping ranges.
 
 `timelineForYear` requests parent periods from `periodsForYear`, also including periods carried over from the previous year. The broad Holiday Season celebration is hidden on the timeline; its Holiday Season and Late Holiday Season stages remain. Homepage calls retain the default phase-only behavior. Phase emojis inherit from their parent, matching the homepage; guidance rows remain in homepage suggestions and are not separate timeline cards. Card tints reuse the daily palette at each period’s start with stable readable text in both themes. Names and descriptions come directly from CSV translations; controls use `messages` and the supported-language registry.
 
 Each card links to `#home?date=YYYY-MM-DD`, preserving the language path and supporting refresh, sharing, and browser history. Full original start dates are retained even for carryover entries beginning before the maintained exploration range. Date changes on the homepage clear this initial deep-link date. Tests in `tests/timeline.test.js` verify all definitions, daily homepage coverage, ordering, year boundaries, leap day, movable rules, translations, and Today placement. `scripts/timeline-browser-check.mjs` checks navigation, themes, and responsive layouts using the optional Playwright setup above.
+
+### Website icons
+
+The root favicon files and `site.webmanifest` provide browser-tab and home-screen icons. The build copies them into `dist/`; localized pages link back to these shared assets. Manifest paths are relative so installation stays within the site’s deployed subdirectory. The manifest name is The Season Says.

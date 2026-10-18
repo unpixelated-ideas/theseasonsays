@@ -5,12 +5,12 @@ try{
  const page=await browser.newPage({timezoneId:'America/New_York'}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));
  await page.clock.install({time:new Date('2026-10-10T16:00:00Z')});
- await page.goto('http://127.0.0.1:5173/#complete');
+ await page.goto(`${process.env.BASE_URL||'http://127.0.0.1:5173'}/#complete`);
  await page.locator('#year').waitFor();assert.equal(await page.locator('#year').inputValue(),'2026');
  assert.equal(await page.locator('.timeline-today').count(),1);
  await page.locator('#timeline-next').click();assert.equal(await page.locator('#year').inputValue(),'2027');assert.equal(await page.locator('.timeline-today').count(),0);
  await page.locator('#timeline-current').click();assert.equal(await page.locator('#year').inputValue(),'2026');
- for(const year of ['2024','2028']){await page.locator('#year').selectOption(year);assert.equal(await page.locator(year==='2024'?'#timeline-previous':'#timeline-next').isDisabled(),true);}
+ for(const year of ['1900','2127']){await page.locator('#year').selectOption(year);assert.equal(await page.locator(year==='1900'?'#timeline-previous':'#timeline-next').isDisabled(),true);}
  await page.locator('#year').selectOption('2026');
  for(const lang of ['en','ko','ga'])for(const mode of ['light','dark'])for(const width of [320,768,1440]){
   await page.locator('#language').selectOption(lang);await page.locator('#appearance').selectOption(mode);await page.setViewportSize({width,height:900});

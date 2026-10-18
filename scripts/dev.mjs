@@ -4,7 +4,7 @@ import {resolve,extname,sep} from 'node:path';
 import {supportedLanguages,languagePath} from '../src/config/site.js';
 import {entryPage} from './entry-page.mjs';
 const built=process.argv.includes('--dist'),root=resolve(built?'dist':'.');
-const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.csv':'text/csv; charset=utf-8','.json':'application/json; charset=utf-8','.png':'image/png'};
+const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.csv':'text/csv; charset=utf-8','.json':'application/json; charset=utf-8','.png':'image/png','.ico':'image/vnd.microsoft.icon','.webmanifest':'application/manifest+json'};
 http.createServer(async(req,res)=>{try{
  const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
  let target=resolve(root,'.'+pathname);

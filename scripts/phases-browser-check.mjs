@@ -4,7 +4,7 @@ const browser=await chromium.launch({headless:true,channel:process.env.BROWSER_C
 try {
  const page=await browser.newPage({timezoneId:'America/New_York'}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));
- await page.goto('http://127.0.0.1:5173');await page.locator('#current-title').waitFor();
+ await page.goto(process.env.BASE_URL||'http://127.0.0.1:5173');await page.locator('#current-title').waitFor();
  const choose=async date=>{await page.locator('#calendar-button').click();await page.locator('#calendar-date').fill(date);await page.keyboard.press('Escape');};
  await choose('2026-12-31');
  assert.equal(await page.locator('#next-year').innerText(),'2027 →');assert.equal(await page.locator('#previous-year').isVisible(),false);
@@ -15,7 +15,7 @@ try {
  await choose('2024-12-31');await page.locator('#next-year').click();await page.locator('#previous-year').click();assert.equal(await page.locator('#date-slider').inputValue(),'365');
  for(const [date,title] of [['2026-01-08','Early Winter'],['2026-02-20','Late Winter'],['2026-10-15','Halloween']]){await choose(date);assert.match(await page.locator('#current-title').innerText(),new RegExp(title));assert.equal(await page.locator('#previous-year').isVisible(),false);assert.equal(await page.locator('#next-year').isVisible(),false);}
  assert.match(await page.locator('.overlaps').innerText(),/Early to Mid Autumn/);
- for(const [date,control] of [['2024-01-01','#previous-year'],['2028-12-31','#next-year']]){await choose(date);assert.equal(await page.locator(control).isVisible(),false);}
+ for(const [date,control] of [['1900-01-01','#previous-year'],['2127-12-31','#next-year']]){await choose(date);assert.equal(await page.locator(control).isVisible(),false);}
  await choose('2026-12-31');
  for(const width of [320,390,768,1440])for(const mode of ['light','dark'])for(const lang of ['en','ko','ga']){
   await page.setViewportSize({width,height:1000});await page.locator('#appearance').selectOption(mode);await page.locator('#language').selectOption(lang);

@@ -17,5 +17,5 @@ export function entryPage(template,language){
 <meta name="twitter:image" content="${image}">
 <link rel="canonical" href="${url}">
 ${[...supportedLanguages,'x-default'].map(lang=>`<link rel="alternate" hreflang="${lang}" href="${escape(canonicalURL(lang==='x-default'?site.defaultLanguage:lang))}">`).join('\n')}`;
- return template.replace(/<html lang="[^"]*">/,`<html lang="${language}">`).replace('<!-- metadata -->',metadata).replaceAll('./src/',languagePath(language)?'../src/':'./src/');
+ return template.replace(/<html lang="[^"]*">/,`<html lang="${language}">`).replace('<!-- metadata -->',metadata).replace(/(href|src)="\.\//g,`$1="${languagePath(language)?'../':'./'}`);
 }
