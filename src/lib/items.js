@@ -1,5 +1,5 @@
 import {activeOn} from './calendar.js';
-import {localDate,addDays,key} from './dates.js';
+import {localDate,addDays,key,daysInYear} from './dates.js';
 const categories=['decor','food','activities','media'];
 const languages=['en','ko','ga'];
 const normalize=value=>value.normalize('NFC').trim().replace(/\s+/gu,' ').toLowerCase();
@@ -48,4 +48,28 @@ export function itemYear(rows,annual,year){
   }
  }
  return result;
+}
+
+// Both the verdict and the annual overview use the effective guide result.
+export function itemStatus(item) {
+  return item ? (item.gray ? 'gray' : 'allowed') : 'notAllowed';
+}
+
+export function itemYearOverview(rows, annual, id, year) {
+  const segments = [];
+  const totals = { allowed: 0, gray: 0, notAllowed: 0 };
+  const days = daysInYear(year);
+  for (let index = 0; index < days; index++) {
+    const date = localDate(year, 1, index + 1);
+    const status = itemStatus(dateItems(rows, annual, date).get(id));
+    const last = segments.at(-1);
+    totals[status]++;
+    if (last?.status === status) {
+      last.end = date;
+      last.days++;
+    } else {
+      segments.push({ status, start: date, end: date, days: 1 });
+    }
+  }
+  return { segments, totals, days };
 }

@@ -56,6 +56,13 @@ export const updates = [
     ko: ["계절 타임라인의 범위를 기존 2024~2028년에서 1900~2127년으로 확대했습니다.", "허용 및 허용되지 않음 섹션의 개별 항목에 대한 전용 페이지를 열고 공유할 수 있는 새로운 베타 기능을 도입했습니다.", "사이트의 파비콘이 올바르게 표시되지 않던 문제를 수정했습니다."],
     ga: ["Leathnaíodh Amlíne na Séasúr chun an tréimhse ó 1900 go 2127 a chlúdach, in ionad an raoin bhunaidh ó 2024 go 2028.", "Tugadh isteach gné nua béite a ligeann duit leathanaigh ar leith a oscailt agus a chomhroinnt do mhíreanna aonair sna rannáin Ceadaithe agus Ní cheadaítear.", "Réitíodh fadhb a chuir cosc ar dheilbhín an tsuímh a bheith le feiceáil i gceart."],
   },
+  {
+    date: "2026-11-21",
+    version: "v0.8",
+    en: ["Refined the design of each seasonal item's shareable page for a clearer, more polished experience."],
+    ko: ["각 계절 항목의 공유 가능한 페이지 디자인을 다듬어 더 명확하고 세련된 이용 경험을 제공하도록 개선했습니다."],
+    ga: ["Cuireadh feabhas ar dhearadh leathanach in-chomhroinnte gach míre séasúraí chun eispéireas níos soiléire agus níos snasta a chur ar fáil."],
+  },
 ];
 export const updateLabels = {
   en: { title: 'Update Log', close: 'Close' },
