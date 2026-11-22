@@ -48,7 +48,7 @@ test('reset contains only approved seasonal lists and no automatic drafts',()=>{
   assert.equal(contentItems(late,'impermissible',language).length,11);
   assert.deepEqual(new Set(contentItems(late,'impermissible',language)),new Set([...contentItems(autumn,'permissible',language),contentItems(rows.find(r=>r.id==='halloween'),'permissible',language)[0]]));
   for(const row of rows)for(const prefix of ['permissible','impermissible']){
-   const expected=row.category==='guidance'?(prefix==='permissible'?1:0):row.id==='black-friday'&&prefix==='permissible'?21:row.id==='spring'&&prefix==='permissible'?5:row.id==='easter'&&prefix==='permissible'?11:row.id==='early-summer'&&prefix==='permissible'?7:row.id==='summer'&&prefix==='permissible'?13:row.id==='independence'&&prefix==='permissible'?10:row.id==='late-summer'&&prefix==='permissible'?11:row.id==='late-summer'&&prefix==='impermissible'?11:row.id==='autumn'?(prefix==='permissible'?10:13):row.id==='halloween'?(prefix==='permissible'?13:8):row.id==='thanksgiving'?(prefix==='permissible'?18:20):row.id==='holiday'?(prefix==='permissible'?21:18):row.id==='new-year'&&prefix==='permissible'?18:row.id==='winter'?(prefix==='permissible'?4:11):row.id==='valentine'&&prefix==='permissible'?11:row.id==='patrick'&&prefix==='permissible'?14:row.id==='chuseok'&&prefix==='permissible'?11:row.id==='lunar'&&prefix==='permissible'?8:0;
+   const expected=row.category==='guidance'?(prefix==='permissible'?1:0):row.id==='black-friday'&&prefix==='permissible'?21:row.id==='spring'&&prefix==='permissible'?4:row.id==='easter'&&prefix==='permissible'?11:row.id==='early-summer'&&prefix==='permissible'?7:row.id==='summer'&&prefix==='permissible'?13:row.id==='independence'&&prefix==='permissible'?10:row.id==='late-summer'&&prefix==='permissible'?11:row.id==='late-summer'&&prefix==='impermissible'?11:row.id==='autumn'?(prefix==='permissible'?10:13):row.id==='halloween'?(prefix==='permissible'?13:8):row.id==='thanksgiving'?(prefix==='permissible'?18:20):row.id==='holiday'?(prefix==='permissible'?21:18):row.id==='new-year'&&prefix==='permissible'?18:row.id==='winter'?(prefix==='permissible'?4:11):row.id==='valentine'&&prefix==='permissible'?11:row.id==='patrick'&&prefix==='permissible'?14:row.id==='chuseok'&&prefix==='permissible'?11:row.id==='lunar'&&prefix==='permissible'?8:0;
    const count = row.id==='halloween' && prefix==='permissible' ? 23 : expected;
    assert.equal(contentItems(row,prefix,language).length,count,`${row.id}: ${prefix}`);
   }
@@ -123,11 +123,11 @@ test('Winter borrows Patrick Allowed only February 15 through the last February 
 
 test('Chuseok and Lunar New Year preserve the approved list order',()=>{
  assert.deepEqual(contentItems(rows.find(r=>r.id==='chuseok'),'permissible','en'),['Chuseok décor', 'Full moon imagery', 'Songpyeon (half-moon-shaped rice cakes)', 'Harvest imagery', 'Rice stalks', 'Persimmons', 'Chestnuts', 'Jujubes', 'Korean pears', 'Gift sets', 'Traditional Korean or East Asian patterns']);
- assert.deepEqual(contentItems(rows.find(r=>r.id==='lunar'),'permissible','en'),['Lunar New Year décor', 'New Year greetings', 'Year-of-the-zodiac imagery', 'Traditional Korean or East Asian games', 'Traditional Korean or East Asian patterns', 'Lucky pouches', 'New Year gift sets', 'Tteokguk (Rice Cake Soup)']);
+ assert.deepEqual(contentItems(rows.find(r=>r.id==='lunar'),'permissible','en'),['Lunar New Year décor', 'New Year greetings', 'Year-of-the-zodiac imagery', 'Traditional Korean or East Asian games', 'Traditional Korean or East Asian patterns', 'Lucky pouches', 'Gift sets', 'Tteokguk (Rice Cake Soup)']);
 });
 
 test('Spring through Late Summer allowed lists and renamed periods are present',()=>{
- const expected={spring:5,easter:11,'early-summer':7,summer:13,independence:10,'late-summer':11};
+ const expected={spring:4,easter:11,'early-summer':7,summer:13,independence:10,'late-summer':11};
  for(const language of ['en','ko','ga'])for(const [id,count] of Object.entries(expected))assert.equal(contentItems(rows.find(r=>r.id===id),'permissible',language).length,count,id);
  assert.equal(rows.find(r=>r.id==='independence').name_en,'U.S. Independence Day');
  assert.equal(rows.find(r=>r.id==='early-summer').name_en,'Late Spring');

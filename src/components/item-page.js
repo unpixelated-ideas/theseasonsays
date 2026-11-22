@@ -6,6 +6,13 @@ import { key, fromKey, localDate, difference } from '../lib/dates.js';
 import { escapeHTML as e, formatDate } from './views.js';
 
 const statuses = ['allowed', 'gray', 'notAllowed'];
+const itemAliases = new Map([
+  ['fireworks-decor', 'fireworks-imagery'],
+  ['new-year-gift-sets', 'gift-sets'],
+  ['happy-new-year-decor', 'new-year-greetings'],
+  ['spring-flowers-decor', 'floral-decor'],
+  ['summer-floral-decor', 'floral-decor'],
+]);
 const symbols = { allowed: '✓', gray: '≈', notAllowed: '×' };
 const icon = status => `<span class="item-icon" data-status="${status}" aria-hidden="true">${symbols[status]}</span>`;
 const supported = date => date && date.getFullYear() >= site.minYear && date.getFullYear() <= site.maxYear;
@@ -59,7 +66,8 @@ function annualView(overview, year, date, m, copy) {
 }
 
 export function createItemPages(rows, annual, catalog) {
-  return function renderItem(page, id, language, m, today) {
+  return function renderItem(page, requestedId, language, m, today) {
+    const id = itemAliases.get(requestedId) ?? requestedId;
     const copy = itemCopy[language];
     const item = catalog.get(id);
     if (!item) {
