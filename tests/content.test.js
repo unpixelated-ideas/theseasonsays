@@ -48,19 +48,23 @@ test('reset contains only approved seasonal lists and no automatic drafts',()=>{
   assert.equal(contentItems(late,'impermissible',language).length,11);
   assert.deepEqual(new Set(contentItems(late,'impermissible',language)),new Set([...contentItems(autumn,'permissible',language),contentItems(rows.find(r=>r.id==='halloween'),'permissible',language)[0]]));
   for(const row of rows)for(const prefix of ['permissible','impermissible']){
-   const expected=row.category==='guidance'?(prefix==='permissible'?1:0):row.id==='black-friday'&&prefix==='permissible'?21:row.id==='spring'&&prefix==='permissible'?4:row.id==='easter'&&prefix==='permissible'?11:row.id==='early-summer'&&prefix==='permissible'?7:row.id==='summer'&&prefix==='permissible'?13:row.id==='independence'&&prefix==='permissible'?10:row.id==='late-summer'&&prefix==='permissible'?11:row.id==='late-summer'&&prefix==='impermissible'?11:row.id==='autumn'?(prefix==='permissible'?10:13):row.id==='halloween'?(prefix==='permissible'?13:8):row.id==='thanksgiving'?(prefix==='permissible'?18:20):row.id==='holiday'?(prefix==='permissible'?21:18):row.id==='new-year'&&prefix==='permissible'?18:row.id==='winter'?(prefix==='permissible'?4:11):row.id==='valentine'&&prefix==='permissible'?11:row.id==='patrick'&&prefix==='permissible'?14:row.id==='chuseok'&&prefix==='permissible'?11:row.id==='lunar'&&prefix==='permissible'?8:0;
+   const expected=row.category==='guidance'?(prefix==='permissible'?1:0):row.id==='black-friday'&&prefix==='permissible'?22:row.id==='spring'&&prefix==='permissible'?4:row.id==='easter'&&prefix==='permissible'?11:row.id==='early-summer'&&prefix==='permissible'?7:row.id==='summer'&&prefix==='permissible'?13:row.id==='independence'&&prefix==='permissible'?10:row.id==='late-summer'&&prefix==='permissible'?11:row.id==='late-summer'&&prefix==='impermissible'?11:row.id==='autumn'?(prefix==='permissible'?10:13):row.id==='halloween'?(prefix==='permissible'?13:8):row.id==='thanksgiving'?(prefix==='permissible'?18:20):row.id==='holiday'?(prefix==='permissible'?22:18):row.id==='new-year'&&prefix==='permissible'?18:row.id==='winter'?(prefix==='permissible'?4:11):row.id==='valentine'&&prefix==='permissible'?11:row.id==='patrick'&&prefix==='permissible'?14:row.id==='chuseok'&&prefix==='permissible'?11:row.id==='lunar'&&prefix==='permissible'?8:0;
    const count = row.id==='halloween' && prefix==='permissible' ? 23 : expected;
    assert.equal(contentItems(row,prefix,language).length,count,`${row.id}: ${prefix}`);
   }
   assert.deepEqual(new Set(contentItems(rows.find(r=>r.id==='thanksgiving'),'permissible',language)),new Set([...contentItems(rows.find(r=>r.id==='halloween'),'impermissible',language),...contentItems(autumn,'permissible',language)]));
-  assert.deepEqual(contentItems(rows.find(r=>r.id==='thanksgiving'),'impermissible',language),contentItems(rows.find(r=>r.id==='holiday'),'permissible',language).filter(item=>item!==rows.find(r=>r.id==='holiday')[`permissible_food_${language}`]));
+  const holiday = rows.find(r=>r.id==='holiday');
+  const thanksgivingRestrictions = contentItems(rows.find(r=>r.id==='thanksgiving'),'impermissible',language);
+  assert.deepEqual(thanksgivingRestrictions, contentItems(holiday,'permissible',language).filter(item =>
+   item!==holiday[`permissible_food_${language}`] && item!==holiday[`permissible_activities_${language}`]));
+  assert.deepEqual(contentItems(rows.find(r=>r.id==='black-friday'),'permissible',language),contentItems(holiday,'permissible',language));
   for (const item of contentItems(autumn,'permissible',language)) {
    assert.ok(contentItems(rows.find(r=>r.id==='halloween'),'permissible',language).includes(item));
   }
   const html=currentCard([{...late,start:new Date(2026,8,7),end:new Date(2026,8,21)}],language,messages[language]);
   assert.ok(!html.includes('restriction-draft'));
  }
- assert.deepEqual(contentItems(rows.find(r=>r.id==='holiday'),'permissible','en'),['Holiday décor', 'Holiday trees', 'Holiday lights', 'Holiday wreaths', 'Holiday stockings', 'Santa Claus', 'Reindeer', 'Candy canes', 'Gingerbread houses', 'Holiday ornaments', 'Mistletoe', 'Holly', 'Poinsettias', 'Snowmen', 'Snowflakes', 'Snow-covered scenery', 'Winter village décor', '“Winter Wonderland” décor', 'Eggnog', 'Holiday music', 'Holiday films']);
+ assert.deepEqual(contentItems(rows.find(r=>r.id==='holiday'),'permissible','en'),['Holiday décor', 'Holiday trees', 'Holiday lights', 'Holiday wreaths', 'Holiday stockings', 'Santa Claus', 'Reindeer', 'Candy canes', 'Gingerbread houses', 'Holiday ornaments', 'Mistletoe', 'Holly', 'Poinsettias', 'Snowmen', 'Snowflakes', 'Snow-covered scenery', 'Winter village décor', '“Winter Wonderland” décor', 'Eggnog', 'Holiday Cards', 'Holiday music', 'Holiday films']);
  assert.deepEqual(contentItems(rows.find(r=>r.id==='halloween'),'permissible','en').slice(0,13),['Halloween décor', 'Jack-o’-lanterns', 'Ghosts', 'Witches', 'Bats', 'Black cats', 'Skeletons', 'Spiderwebs', 'Haunted houses', 'Halloween candy', 'Candy corn', 'Costumes', 'Candles']);
  assert.deepEqual(contentItems(rows.find(r=>r.id==='halloween'),'impermissible','en'),['Thanksgiving décor', 'Turkeys', 'Cornucopias', 'Pilgrims', '“Give Thanks” décor', '“Happy Thanksgiving” décor', 'Thanksgiving table settings', 'Thanksgiving dinner imagery']);
 });
