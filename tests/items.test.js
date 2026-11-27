@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {parseCalendar,parseAnnual,activeOn} from '../src/lib/calendar.js';
+import {parseCalendar,parseAnnual,activeOn,resolve} from '../src/lib/calendar.js';
 import {createItemCatalog,dateItems,itemYear,itemYearOverview,itemHref,entries} from '../src/lib/items.js';
 import {currentCard} from '../src/components/views.js';
 import {messages} from '../src/i18n/messages.js';
@@ -34,10 +34,12 @@ test('gray-area and multi-season items retain calendar qualifications',()=>{
  assert.equal(dateItems(rows,annual,fromKey('2026-07-01')).has('amber-dark-spirits'),false);
 });
 test('apple cider donuts are allowed throughout autumn only', () => {
+  const autumn = resolve('autumn', 2026, annual);
+  const winter = resolve('winter', 2026, annual);
   for (const [day, allowed] of [
-    ['2026-06-22', false], ['2026-09-21', false], ['2026-09-22', true],
+    ['2026-06-22', false], [key(addDays(autumn, -1)), false], [key(autumn), true],
     ['2026-10-31', true], ['2026-11-26', true], ['2026-11-27', true],
-    ['2026-12-20', true], ['2026-12-22', false],
+    [key(addDays(winter, -1)), true], [key(winter), false],
   ]) {
     const item = dateItems(rows, annual, fromKey(day)).get('apple-cider-donuts');
     assert.equal(Boolean(item), allowed, day);
