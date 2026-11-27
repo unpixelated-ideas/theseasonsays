@@ -29,7 +29,7 @@ export function allowedItemsWithOverlaps(period, active, language) {
   }
   return [...allowedEntries(period, language).values()].filter(item => item.label).map(item => ({
     ...item,
-    grayArea: Boolean(period.autumnGrayArea) && !['sweater-weather themes', 'warm or cold cider'].includes(item.key),
+    grayArea: Boolean(period.autumnGrayArea) && !['sweater-weather themes', 'warm or cold cider', 'apple cider donuts'].includes(item.key),
     matches: [...others.values()].filter(event => event.items.has(item.key)).map(({id, name}) => ({id, name})),
   }));
 }

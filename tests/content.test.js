@@ -11,13 +11,13 @@ const rows=parseCalendar(readFileSync(new URL('../src/data/calendar.csv',import.
 test('Autumn transitions at Black Friday and December 1 in every language',()=>{
  const annual=parseAnnual(readFileSync(new URL('../src/data/annual-dates.csv',import.meta.url),'utf8'));
  for(const [year,friday] of [[2024,29],[2026,27],[2027,26]])for(const language of ['en','ko','ga']) {
-  for(const [month,day,restricted,count,warnings] of [[11,friday-1,20,10,0],[11,friday,0,10,8],[11,30,0,10,8],[12,1,0,2,0],[12,19,0,2,0]]) {
+  for(const [month,day,restricted,count,warnings] of [[11,friday-1,22,11,0],[11,friday,0,11,8],[11,30,0,11,8],[12,1,0,3,0],[12,19,0,3,0]]) {
    const active=activeOn(rows,annual,new Date(year,month-1,day,12)),autumn=active.find(p=>p.id==='autumn');
    assert.equal(contentItems(autumn,'impermissible',language).length,restricted);
    const items=allowedItemsWithOverlaps(autumn,[],language);
    assert.equal(items.length,count);assert.equal(items.filter(item=>item.grayArea).length,warnings);
-   for(const item of items)if(['sweater-weather themes','warm or cold cider'].includes(item.key))assert.equal(item.grayArea,false);
-   if(month===12)assert.deepEqual(items.map(item=>item.key),['sweater-weather themes','warm cider']);
+   for(const item of items)if(['sweater-weather themes','warm or cold cider','apple cider donuts'].includes(item.key))assert.equal(item.grayArea,false);
+   if(month===12)assert.deepEqual(items.map(item=>item.key),['sweater-weather themes','warm cider','apple cider donuts']);
    const html=currentCard(active,language,messages[language]);
    assert.equal((html.match(/class="overlap-button gray-area-button"/g)||[]).length,warnings);
    if(warnings)assert.ok(html.includes(grayAreaCopy[language]));
@@ -33,30 +33,29 @@ test('Black Friday is featured only the day after Thanksgiving with Holiday Allo
   for(const language of ['en','ko','ga']) assert.deepEqual(contentItems(active[0],'permissible',language),contentItems(rows.find(r=>r.id==='holiday'),'permissible',language));
  }
 });
-test('Summer shares Late Summer restrictions only from August 1 onward',()=>{
+test('Summer restricts apple cider donuts throughout and shares other Late Summer restrictions from August 1',()=>{
  const annual=parseAnnual(readFileSync(new URL('../src/data/annual-dates.csv',import.meta.url),'utf8'));
  const source=rows.find(row=>row.id==='late-summer');
  for(const language of ['en','ko','ga'])for(const [month,day,restricted] of [[7,31,false],[8,1,true],[8,31,true],[9,6,true]]) {
   const summer=activeOn(rows,annual,new Date(2026,month-1,day,12)).find(row=>row.id==='summer');
   assert.ok(summer);
-  assert.deepEqual(contentItems(summer,'impermissible',language),restricted?contentItems(source,'impermissible',language):[]);
+  assert.deepEqual(contentItems(summer,'impermissible',language),restricted?contentItems(source,'impermissible',language):[rows.find(row=>row.id==='summer')[`impermissible_food_${language}`]]);
  }
 });
 test('reset contains only approved seasonal lists and no automatic drafts',()=>{
  for(const language of ['en','ko','ga']) {
   const late=rows.find(r=>r.id==='late-summer'),autumn=rows.find(r=>r.id==='autumn');
-  assert.equal(contentItems(late,'impermissible',language).length,11);
+  assert.equal(contentItems(late,'impermissible',language).length,12);
   assert.deepEqual(new Set(contentItems(late,'impermissible',language)),new Set([...contentItems(autumn,'permissible',language),contentItems(rows.find(r=>r.id==='halloween'),'permissible',language)[0]]));
   for(const row of rows)for(const prefix of ['permissible','impermissible']){
-   const expected=row.category==='guidance'?(prefix==='permissible'?1:0):row.id==='black-friday'&&prefix==='permissible'?22:row.id==='spring'&&prefix==='permissible'?4:row.id==='easter'&&prefix==='permissible'?11:row.id==='early-summer'&&prefix==='permissible'?7:row.id==='summer'&&prefix==='permissible'?13:row.id==='independence'&&prefix==='permissible'?10:row.id==='late-summer'&&prefix==='permissible'?11:row.id==='late-summer'&&prefix==='impermissible'?11:row.id==='autumn'?(prefix==='permissible'?10:13):row.id==='halloween'?(prefix==='permissible'?13:8):row.id==='thanksgiving'?(prefix==='permissible'?18:20):row.id==='holiday'?(prefix==='permissible'?22:18):row.id==='new-year'&&prefix==='permissible'?18:row.id==='winter'?(prefix==='permissible'?4:11):row.id==='valentine'&&prefix==='permissible'?11:row.id==='patrick'&&prefix==='permissible'?14:row.id==='chuseok'&&prefix==='permissible'?11:row.id==='lunar'&&prefix==='permissible'?8:0;
-   const count = row.id==='halloween' && prefix==='permissible' ? 23 : expected;
+   const expected=row.category==='guidance'?(prefix==='permissible'?1:0):row.id==='black-friday'&&prefix==='permissible'?22:row.id==='spring'&&prefix==='permissible'?4:row.id==='easter'&&prefix==='permissible'?11:row.id==='early-summer'&&prefix==='permissible'?7:row.id==='summer'?(prefix==='permissible'?13:1):row.id==='independence'&&prefix==='permissible'?10:row.id==='late-summer'&&prefix==='permissible'?11:row.id==='late-summer'&&prefix==='impermissible'?12:row.id==='autumn'?(prefix==='permissible'?11:13):row.id==='halloween'?(prefix==='permissible'?13:8):row.id==='thanksgiving'?(prefix==='permissible'?19:22):row.id==='holiday'?(prefix==='permissible'?22:18):row.id==='new-year'&&prefix==='permissible'?18:row.id==='winter'?(prefix==='permissible'?4:11):row.id==='valentine'&&prefix==='permissible'?11:row.id==='patrick'&&prefix==='permissible'?14:row.id==='chuseok'&&prefix==='permissible'?11:row.id==='lunar'&&prefix==='permissible'?8:0;
+   const count = row.id==='halloween' && prefix==='permissible' ? 24 : expected;
    assert.equal(contentItems(row,prefix,language).length,count,`${row.id}: ${prefix}`);
   }
   assert.deepEqual(new Set(contentItems(rows.find(r=>r.id==='thanksgiving'),'permissible',language)),new Set([...contentItems(rows.find(r=>r.id==='halloween'),'impermissible',language),...contentItems(autumn,'permissible',language)]));
   const holiday = rows.find(r=>r.id==='holiday');
   const thanksgivingRestrictions = contentItems(rows.find(r=>r.id==='thanksgiving'),'impermissible',language);
-  assert.deepEqual(thanksgivingRestrictions, contentItems(holiday,'permissible',language).filter(item =>
-   item!==holiday[`permissible_food_${language}`] && item!==holiday[`permissible_activities_${language}`]));
+  assert.deepEqual(thanksgivingRestrictions, contentItems(holiday,'permissible',language));
   assert.deepEqual(contentItems(rows.find(r=>r.id==='black-friday'),'permissible',language),contentItems(holiday,'permissible',language));
   for (const item of contentItems(autumn,'permissible',language)) {
    assert.ok(contentItems(rows.find(r=>r.id==='halloween'),'permissible',language).includes(item));
@@ -72,10 +71,10 @@ test('reset contains only approved seasonal lists and no automatic drafts',()=>{
 test('Autumn Halloween restrictions end after September 30',()=>{
  const annual=parseAnnual(readFileSync(new URL('../src/data/annual-dates.csv',import.meta.url),'utf8'));
  for(const language of ['en','ko','ga']) {
-  for(const [month,day,count] of [[9,30,13],[10,1,8],[10,15,8],[10,31,8],[11,1,20],[11,26,20],[11,27,0],[11,30,0]]) {
+  for(const [month,day,count] of [[9,30,13],[10,1,8],[10,15,8],[10,31,8],[11,1,22],[11,26,22],[11,27,0],[11,30,0]]) {
    const autumn=activeOn(rows,annual,new Date(2026,month-1,day,12)).find(r=>r.id==='autumn');
    assert.equal(contentItems(autumn,'impermissible',language).length,count);
-   assert.equal(contentItems(autumn,'permissible',language).length,10);
+   assert.equal(contentItems(autumn,'permissible',language).length,11);
    if(month===10)assert.deepEqual(contentItems(autumn,'impermissible',language),contentItems(rows.find(r=>r.id==='halloween'),'impermissible',language));
    if(month===11 && count)assert.deepEqual(contentItems(autumn,'impermissible',language),contentItems(rows.find(r=>r.id==='thanksgiving'),'impermissible',language));
   }

@@ -20,7 +20,7 @@ export function dateItems(rows,annual,date){
   const combined={...period};
   for(const [field,value] of Object.entries(period.guidance||{}))combined[field]=[combined[field],value].filter(Boolean).join(' | ');
   for(const item of entries(combined)){
-   const gray=Boolean(period.autumnGrayArea)&&!['sweater-weather-themes','warm-or-cold-cider'].includes(item.id);
+   const gray=Boolean(period.autumnGrayArea)&&!['sweater-weather-themes','warm-or-cold-cider','apple-cider-donuts'].includes(item.id);
    const old=result.get(item.id);
    result.set(item.id,{...item,gray:old?old.gray&&gray:gray});
   }

@@ -63,6 +63,13 @@ export const updates = [
     ko: ["각 계절 항목의 공유 가능한 페이지 디자인을 다듬어 더 명확하고 세련된 이용 경험을 제공하도록 개선했습니다."],
     ga: ["Cuireadh feabhas ar dhearadh leathanach in-chomhroinnte gach míre séasúraí chun eispéireas níos soiléire agus níos snasta a chur ar fáil."],
   },
+  {
+    date: "2026-11-26",
+    version: "v0.8.1",
+    en: ["Happy Thanksgiving! Updated several items in response to user feedback.", "Further refined each seasonal item's shareable page to make it easier to read."],
+    ko: ["행복한 추수감사절 보내세요! 사용자 의견을 반영해 여러 항목을 업데이트했습니다.", "각 계절 항목의 공유 가능한 페이지를 더 쉽게 읽을 수 있도록 추가로 다듬었습니다."],
+    ga: ["Lá an Altaithe sona daoibh! Nuashonraíodh roinnt míreanna mar fhreagra ar aiseolas úsáideoirí.", "Cuireadh tuilleadh feabhais ar leathanach in-chomhroinnte gach míre séasúraí chun é a dhéanamh níos éasca le léamh."],
+  },
 ];
 export const updateLabels = {
   en: { title: 'Update Log', close: 'Close' },

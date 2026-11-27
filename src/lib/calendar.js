@@ -145,9 +145,11 @@ export function activeOn(rows, annual, date) {
             ko: ['스웨터가 어울리는 날씨 테마', '따뜻한 사과 사이다'],
             ga: ['Téamaí aimsire geansaí', 'Leann úll te'],
           };
+          const donutIndex = (period.permissible_food_en || '').split(' | ').indexOf('Apple cider donuts');
           for (const [language, [sweater, cider]] of Object.entries(winterAutumn)) {
             result[`permissible_decor_${language}`] = sweater;
-            result[`permissible_food_${language}`] = cider;
+            const donuts = (period[`permissible_food_${language}`] || '').split(' | ')[donutIndex];
+            result[`permissible_food_${language}`] = [cider, donuts].filter(Boolean).join(' | ');
           }
         }
         return result;

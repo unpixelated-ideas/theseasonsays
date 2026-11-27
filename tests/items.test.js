@@ -33,6 +33,17 @@ test('gray-area and multi-season items retain calendar qualifications',()=>{
  assert.equal(dateItems(rows,annual,fromKey('2026-07-01')).has('clear-light-spirits'),true);
  assert.equal(dateItems(rows,annual,fromKey('2026-07-01')).has('amber-dark-spirits'),false);
 });
+test('apple cider donuts are allowed throughout autumn only', () => {
+  for (const [day, allowed] of [
+    ['2026-06-22', false], ['2026-09-21', false], ['2026-09-22', true],
+    ['2026-10-31', true], ['2026-11-26', true], ['2026-11-27', true],
+    ['2026-12-20', true], ['2026-12-22', false],
+  ]) {
+    const item = dateItems(rows, annual, fromKey(day)).get('apple-cider-donuts');
+    assert.equal(Boolean(item), allowed, day);
+    if (item) assert.equal(item.gray, false, day);
+  }
+});
 test('list links preserve exploratory dates and keep indicators outside anchors',()=>{
  const date=fromKey('2026-10-18');
  for(const lang of ['en','ko','ga']){

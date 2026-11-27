@@ -206,7 +206,13 @@ summary .overlap-emoji{display:inline;margin:0 8px 0 0;font-size:1em;color:inher
   padding-top: 12px;
   border-top: 1px solid var(--line);
 }
-.item-annual h2 { margin: 0; font-size: 1.5rem; }
+.item-details .item-annual h2 {
+  margin: 0;
+  padding: 0;
+  font-size: 1.5rem;
+  line-height: normal;
+  letter-spacing: normal;
+}
 .item-year { display: flex; align-items: center; gap: 6px; font-size: .875rem; }
 .item-year select { padding-inline: 6px; font-weight: 600; }
 .item-axis {
@@ -262,8 +268,9 @@ summary .overlap-emoji{display:inline;margin:0 8px 0 0;font-size:1em;color:inher
 @media (max-width: 480px) {
   .item-toolbar { margin-bottom: 14px; }
   .item-annual { margin-top: 22px; }
-  .item-annual h2 { font-size: 1.3rem; }
-  :lang(ga) .item-axis span:last-child { transform: translateX(-30%); }
+  .item-details .item-annual h2 { font-size: 1.3rem; }
+  :lang(ga) .item-axis { font-size: .6875rem; }
+  :lang(ga) .item-axis span:last-child { transform: translateX(-40%); }
   .item-legend { gap: 8px 12px; }
   .item-legend li { flex-basis: 110px; }
   .item-rule { grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); font-size: .9375rem; }

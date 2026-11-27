@@ -95,24 +95,26 @@ export function createItemPages(rows, annual, catalog) {
           </div>
         </details>
       </div>
-      <h1>${e(item.labels[language])}</h1>
-      <p class="item-verdict">${available ? icon(status) + e(copy.verdict(copy[status], formatDate(date, m, true))) : e(copy.unavailable)}</p>
-      ${supplied && !supported(parsed) ? `<p class="item-note" role="status">${e(copy.invalid)}</p>` : ''}
-      ${id === 'holiday-music' ? `<p class="item-note">${e(copy.holiday)}</p>
-        ${status === 'notAllowed' && date.getMonth() >= 1 && date.getMonth() <= 10 ? `<p class="item-note">${e(copy.early)}</p>` : ''}` : ''}
-      <p class="item-share-status" role="status"></p>
-      <section class="item-annual" aria-labelledby="item-annual-title">
-        <div class="item-annual-header">
-          <h2 id="item-annual-title">${e(copy.annual)}</h2>
-          <label class="item-year">${e(copy.year)}
-            <select id="item-year">${Array.from({ length: site.maxYear - site.minYear + 1 }, (_, index) => {
-              const year = site.minYear + index;
-              return `<option value="${year}" ${year === initialYear ? 'selected' : ''}>${year}</option>`;
-            }).join('')}</select>
-          </label>
-        </div>
-        <div class="item-overview"></div>
-      </section>
+      <div class="card item-details">
+        <h1>${e(item.labels[language])}</h1>
+        <p class="item-verdict">${available ? icon(status) + e(copy.verdict(copy[status], formatDate(date, m, true))) : e(copy.unavailable)}</p>
+        ${supplied && !supported(parsed) ? `<p class="item-note" role="status">${e(copy.invalid)}</p>` : ''}
+        ${id === 'holiday-music' ? `<p class="item-note">${e(copy.holiday)}</p>
+          ${status === 'notAllowed' && date.getMonth() >= 1 && date.getMonth() <= 10 ? `<p class="item-note">${e(copy.early)}</p>` : ''}` : ''}
+        <p class="item-share-status" role="status"></p>
+        <section class="item-annual" aria-labelledby="item-annual-title">
+          <div class="item-annual-header">
+            <h2 id="item-annual-title">${e(copy.annual)}</h2>
+            <label class="item-year">${e(copy.year)}
+              <select id="item-year">${Array.from({ length: site.maxYear - site.minYear + 1 }, (_, index) => {
+                const year = site.minYear + index;
+                return `<option value="${year}" ${year === initialYear ? 'selected' : ''}>${year}</option>`;
+              }).join('')}</select>
+            </label>
+          </div>
+          <div class="item-overview"></div>
+        </section>
+      </div>
     </article>`;
 
     const select = page.querySelector('#item-year');
